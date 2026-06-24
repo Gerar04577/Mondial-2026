@@ -134,18 +134,18 @@ body{background:#0a3d1f;color:#f5f5f0;font-family:Inter,sans-serif;min-height:10
 
 <script>
 var FLAGS = {
-  "Mexico":"&#127474;&#127485;","South Africa":"&#127487;&#127462;","South Korea":"&#127472;&#127479;","Czech Republic":"&#127464;&#127487;",
-  "Canada":"&#127464;&#127462;","Switzerland":"&#127464;&#127469;","Bosnia-Herzegovina":"&#127463;&#127462;","Qatar":"&#127478;&#127462;",
-  "Brazil":"&#127463;&#127479;","Morocco":"&#127474;&#127462;","Scotland":"&#127480;&#127464;","Haiti":"&#127469;&#127481;",
-  "United States":"&#127482;&#127480;","Australia":"&#127462;&#127482;","Paraguay":"&#127477;&#127486;","Turkey":"&#127481;&#127479;",
-  "Germany":"&#127465;&#127466;","Ivory Coast":"&#127464;&#127470;","Ecuador":"&#127466;&#127464;","Curacao":"&#127464;&#127484;",
-  "Netherlands":"&#127475;&#127473;","Japan":"&#127471;&#127477;","Sweden":"&#127480;&#127466;","Tunisia":"&#127481;&#127475;",
-  "Egypt":"&#127466;&#127468;","Iran":"&#127470;&#127479;","Belgium":"&#127463;&#127466;","New Zealand":"&#127475;&#127487;",
-  "Spain":"&#127466;&#127480;","Uruguay":"&#127482;&#127486;","Cape Verde":"&#127464;&#127483;","Saudi Arabia":"&#127480;&#127462;",
-  "France":"&#127467;&#127479;","Norway":"&#127475;&#127476;","Senegal":"&#127480;&#127475;","Iraq":"&#127470;&#127478;",
-  "Argentina":"&#127462;&#127479;","Austria":"&#127462;&#127481;","Algeria":"&#127465;&#127487;","Jordan":"&#127471;&#127476;",
-  "Colombia":"&#127464;&#127476;","Portugal":"&#127477;&#127481;","DR Congo":"&#127464;&#127465;","Uzbekistan":"&#127482;&#127487;",
-  "England":"&#127988;&#917607;&#917605;&#917614;&#917607;&#917631;","Ghana":"&#127468;&#127469;","Croatia":"&#127469;&#127479;","Panama":"&#127477;&#127462;"
+  "Mexico":"🇲🇽","South Africa":"🇿🇦","South Korea":"🇰🇷","Czech Republic":"🇨🇿",
+  "Canada":"🇨🇦","Switzerland":"🇨🇭","Bosnia-Herzegovina":"🇧🇦","Qatar":"🇶🇦",
+  "Brazil":"🇧🇷","Morocco":"🇲🇦","Scotland":"🏴󠁧󠁢󠁳󠁣󠁴󠁿","Haiti":"🇭🇹",
+  "United States":"🇺🇸","Australia":"🇦🇺","Paraguay":"🇵🇾","Turkey":"🇹🇷",
+  "Germany":"🇩🇪","Ivory Coast":"🇨🇮","Ecuador":"🇪🇨","Curacao":"🇨🇼",
+  "Netherlands":"🇳🇱","Japan":"🇯🇵","Sweden":"🇸🇪","Tunisia":"🇹🇳",
+  "Egypt":"🇪🇬","Iran":"🇮🇷","Belgium":"🇧🇪","New Zealand":"🇳🇿",
+  "Spain":"🇪🇸","Uruguay":"🇺🇾","Cape Verde":"🇨🇻","Saudi Arabia":"🇸🇦",
+  "France":"🇫🇷","Norway":"🇳🇴","Senegal":"🇸🇳","Iraq":"🇮🇶",
+  "Argentina":"🇦🇷","Austria":"🇦🇹","Algeria":"🇩🇿","Jordan":"🇯🇴",
+  "Colombia":"🇨🇴","Portugal":"🇵🇹","DR Congo":"🇨🇩","Uzbekistan":"🇺🇿",
+  "England":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","Ghana":"🇬🇭","Croatia":"🇭🇷","Panama":"🇵🇦"
 };
 
 var NAMES_FR = {
@@ -168,47 +168,8 @@ var allStandings = {};
 var activeGrp = 'ALL';
 var currentTab = 'accueil';
 
-function parseToUTCDate(dateStr, timeStr) {
-  if (!dateStr) return new Date();
-  var dParts = dateStr.split('-');
-  var y = parseInt(dParts[0], 10);
-  var m = parseInt(dParts[1], 10) - 1;
-  var d = parseInt(dParts[2], 10);
-  
-  var h = 0, min = 0;
-  if (timeStr) {
-    var tParts = timeStr.split(' ')[0].split(':');
-    h = parseInt(tParts[0], 10) || 0;
-    min = parseInt(tParts[1], 10) || 0;
-  }
-  return new Date(Date.UTC(y, m, d, h, min, 0));
-}
-
-function fmtDateBelge(dateObj){
-  return dateObj.toLocaleDateString('fr-BE',{day:'2-digit',month:'2-digit',timeZone:'Europe/Brussels'});
-}
-
-function fmtDateLongBelge(dateObj){
-  return dateObj.toLocaleDateString('fr-BE',{weekday:'long',day:'numeric',month:'long',timeZone:'Europe/Brussels'});
-}
-
-function fmtHourBelge(dateObj){
-  return dateObj.toLocaleTimeString('fr-BE',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Brussels'});
-}
-
-// Génère une clé unique normalisée pour le groupement par jour (à minuit pile heure belge)
-function getMidnightTimestampBelge(dateObj) {
-  var formatter = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'Europe/Brussels', year: 'numeric', month: 'numeric', day: 'numeric'
-  });
-  var parts = formatter.formatToParts(dateObj);
-  var hash = {};
-  parts.forEach(function(p){ hash[p.type] = p.value; });
-  return Date.UTC(parseInt(hash.year, 10), parseInt(hash.month, 10) - 1, parseInt(hash.day, 10));
-}
-
 function fr(n){ return NAMES_FR[n]||n; }
-function flag(n){ return FLAGS[n]||'&#127988;'; }
+function flag(n){ return FLAGS[n]||'🏳️'; }
 
 function showTab(id, btn) {
   document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
@@ -228,36 +189,35 @@ function loadData() {
   icon.innerHTML = '&#8635;';
   info.textContent = 'Mise à jour...';
 
+  // Tentative API - si indisponible, bascule immédiate sur les données fixes
   var url = 'https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json';
   var proxy = 'https://corsproxy.io/?' + encodeURIComponent(url);
 
   fetch(proxy)
     .then(function(r){ return r.json(); })
     .then(function(data){
-      processData(data);
-      var now = new Date();
-      info.textContent = 'Mis à jour ' + now.toLocaleTimeString('fr-BE',{hour:'2-digit',minute:'2-digit'});
-      btn.disabled = false;
-      icon.className = '';
-      icon.innerHTML = '&#8635;';
-      renderTab(currentTab);
+      // Traitement dynamique si l'API est à jour, sinon fallback sécurisé
+      if (data && data.matches && data.matches.length > 0) {
+        processAPIData(data);
+        var now = new Date();
+        info.textContent = 'Mis à jour ' + now.toLocaleTimeString('fr-BE',{hour:'2-digit',minute:'2-digit'});
+        btn.disabled = false;
+        icon.className = '';
+        renderTab(currentTab);
+      } else {
+        loadFallback();
+      }
     })
     .catch(function(e){
-      info.textContent = 'Erreur - données intégrées utilisées';
-      btn.disabled = false;
-      icon.className = '';
-      icon.innerHTML = '&#8635;';
       loadFallback();
     });
 }
 
-function processData(data) {
+function processAPIData(data) {
   allMatches = [];
   allStandings = {};
-
-  if(!data || !data.matches) return;
-
   var groups = {};
+
   data.matches.forEach(function(m){
     if(!m.group) return;
     var g = m.group.replace('Group ','');
@@ -267,16 +227,19 @@ function processData(data) {
     });
     if(m.score && m.score.ft) {
       var s1 = m.score.ft[0], s2 = m.score.ft[1];
-      groups[g][m.team1].j++;
-      groups[g][m.team2].j++;
+      groups[g][m.team1].j++; groups[g][m.team2].j++;
       if(s1>s2){ groups[g][m.team1].v++; groups[g][m.team1].pts+=3; groups[g][m.team2].d++; }
       else if(s2>s1){ groups[g][m.team2].v++; groups[g][m.team2].pts+=3; groups[g][m.team1].d++; }
       else { groups[g][m.team1].nul++; groups[g][m.team1].pts++; groups[g][m.team2].nul++; groups[g][m.team2].pts++; }
     }
-    var isFinished = !!(m.score && m.score.ft);
     
+    // Pour l'API on applique un ID de tri générique
+    var isFinished = !!(m.score && m.score.ft);
     allMatches.push({
-      dateObj: parseToUTCDate(m.date, m.time),
+      sortId: new Date(m.date).getTime(),
+      dateLabel: new Date(m.date).toLocaleDateString('fr-BE', {weekday:'long', day:'numeric', month:'long'}),
+      dateShort: m.date.split('-').reverse().slice(0,2).join('/'),
+      timeLabel: m.time || '--:--',
       home: m.team1,
       away: m.team2,
       group: g,
@@ -286,62 +249,55 @@ function processData(data) {
     });
   });
 
-  allMatches.sort(function(a,b){ return a.dateObj.getTime() - b.dateObj.getTime(); });
-
-  Object.keys(groups).forEach(function(g){
-    var teams = Object.values(groups[g]);
-    teams.sort(function(a,b){ return b.pts-a.pts; });
-    allStandings[g] = teams.map(function(t,i){ return Object.assign({r:i+1},t); });
-  });
+  allMatches.sort(function(a,b){ return a.sortId - b.sortId; });
+  buildStandings(groups);
 }
 
 function loadFallback() {
-  var rawFallback = [
-    {date:'2026-06-11',time:'19:00',home:'Mexico',away:'South Africa',group:'A',status:'final',scoreH:2,scoreA:0},
-    {date:'2026-06-11',time:'23:00',home:'South Korea',away:'Czech Republic',group:'A',status:'final',scoreH:2,scoreA:1},
-    {date:'2026-06-15',time:'19:00',home:'Mexico',away:'South Korea',group:'A',status:'final',scoreH:2,scoreA:1},
-    {date:'2026-06-15',time:'23:00',home:'Czech Republic',away:'South Africa',group:'A',status:'final',scoreH:1,scoreA:1},
-    {date:'2026-06-17',time:'10:00',home:'Portugal',away:'DR Congo',group:'K',status:'final',scoreH:1,scoreA:1},
-    {date:'2026-06-17',time:'13:00',home:'England',away:'Croatia',group:'L',status:'final',scoreH:4,scoreA:2},
-    {date:'2026-06-17',time:'17:00',home:'Ghana',away:'Panama',group:'L',status:'final',scoreH:1,scoreA:0},
-    {date:'2026-06-17',time:'18:00',home:'Uzbekistan',away:'Colombia',group:'K',status:'final',scoreH:1,scoreA:3},
-    {date:'2026-06-18',time:'23:00',home:'South Africa',away:'South Korea',group:'A',status:'scheduled',scoreH:null,scoreA:null},
-    {date:'2026-06-18',time:'23:00',home:'Czech Republic',away:'Mexico',group:'A',status:'scheduled',scoreH:null,scoreA:null},
-    {date:'2026-06-21',time:'20:00',home:'Uruguay',away:'Cape Verde',group:'H',status:'final',scoreH:2,scoreA:2},
-    {date:'2026-06-21',time:'23:00',home:'New Zealand',away:'Egypt',group:'G',status:'final',scoreH:1,scoreA:3},
-    {date:'2026-06-22',time:'10:00',home:'Argentina',away:'Austria',group:'J',status:'final',scoreH:2,scoreA:0},
-    {date:'2026-06-22',time:'15:00',home:'France',away:'Iraq',group:'I',status:'final',scoreH:3,scoreA:0},
-    {date:'2026-06-22',time:'18:00',home:'Norway',away:'Senegal',group:'I',status:'final',scoreH:3,scoreA:2},
-    {date:'2026-06-22',time:'23:00',home:'Jordan',away:'Algeria',group:'J',status:'final',scoreH:1,scoreA:2},
-    {date:'2026-06-23',time:'10:00',home:'Portugal',away:'Uzbekistan',group:'K',status:'final',scoreH:5,scoreA:0},
-    {date:'2026-06-23',time:'14:00',home:'England',away:'Ghana',group:'L',status:'final',scoreH:0,scoreA:0},
-    {date:'2026-06-23',time:'17:00',home:'Panama',away:'Croatia',group:'L',status:'final',scoreH:0,scoreA:1},
-    {date:'2026-06-23',time:'22:00',home:'Colombia',away:'DR Congo',group:'K',status:'final',scoreH:1,scoreA:0},
-    {date:'2026-06-24',time:'17:00',home:'Switzerland',away:'Canada',group:'B',status:'scheduled',scoreH:null,scoreA:null},
-    {date:'2026-06-24',time:'17:00',home:'Bosnia-Herzegovina',away:'Qatar',group:'B',status:'scheduled',scoreH:null,scoreA:null},
-    {date:'2026-06-24',time:'20:00',home:'Scotland',away:'Brazil',group:'C',status:'scheduled',scoreH:null,scoreA:null},
-    {date:'2026-06-24',time:'20:00',home:'Morocco',away:'Haiti',group:'C',status:'scheduled',scoreH:null,scoreA:null},
-    {date:'2026-06-24',time:'23:00',home:'Czech Republic',away:'Mexico',group:'A',status:'scheduled',scoreH:null,scoreA:null},
-    {date:'2026-06-24',time:'23:00',home:'South Africa',away:'South Korea',group:'A',status:'scheduled',scoreH:null,scoreA:null},
-    {date:'2026-06-25',time:'18:00',home:'Ecuador',away:'Germany',group:'E',status:'scheduled',scoreH:null,scoreA:null},
-    {date:'2026-06-25',time:'18:00',home:'Curacao',away:'Ivory Coast',group:'E',status:'scheduled',scoreH:null,scoreA:null},
-    {date:'2026-06-25',time:'21:00',home:'Tunisia',away:'Netherlands',group:'F',status:'scheduled',scoreH:null,scoreA:null},
-    {date:'2026-06-25',time:'21:00',home:'Japan',away:'Sweden',group:'F',status:'scheduled',scoreH:null,scoreA:null},
+  // DONNÉES DE SECOURS INTELLIGENTES FIXÉES STRICTEMENT SUR L'HEURE BELGE (CEST)
+  // Les heures et libellés ci-dessous correspondent exactement à ce qui doit s'afficher à l'écran.
+  var fallbackData = [
+    {sortId:1, dateLabel:'Jeudi 11 juin', dateShort:'11/06', timeLabel:'21:00', home:'Mexico', away:'South Africa', group:'A', status:'final', scoreH:2, scoreA:0},
+    {sortId:2, dateLabel:'Vendredi 12 juin', dateShort:'12/06', timeLabel:'02:00', home:'South Korea', away:'Czech Republic', group:'A', status:'final', scoreH:2, scoreA:1},
+    {sortId:3, dateLabel:'Lundi 15 juin', dateShort:'15/06', timeLabel:'21:00', home:'Mexico', away:'South Korea', group:'A', status:'final', scoreH:2, scoreA:1},
+    {sortId:4, dateLabel:'Mardi 16 juin', dateShort:'16/06', timeLabel:'02:00', home:'Czech Republic', away:'South Africa', group:'A', status:'final', scoreH:1, scoreA:1},
+    
+    {sortId:5, dateLabel:'Mercredi 17 juin', dateShort:'17/06', timeLabel:'15:00', home:'England', away:'Croatia', group:'L', status:'final', scoreH:4, scoreA:2},
+    {sortId:6, dateLabel:'Mercredi 17 juin', dateShort:'17/06', timeLabel:'19:00', home:'Ghana', away:'Panama', group:'L', status:'final', scoreH:1, scoreA:0},
+    {sortId:7, dateLabel:'Mercredi 17 juin', dateShort:'17/06', timeLabel:'20:00', home:'Uzbekistan', away:'Colombia', group:'K', status:'final', scoreH:1, scoreA:3},
+    {sortId:8, dateLabel:'Mercredi 17 juin', dateShort:'17/06', timeLabel:'23:00', home:'Portugal', away:'DR Congo', group:'K', status:'final', scoreH:1, scoreA:1},
+    
+    {sortId:9, dateLabel:'Vendredi 19 juin', dateShort:'19/06', timeLabel:'01:00', home:'South Africa', away:'South Korea', group:'A', status:'scheduled', scoreH:null, scoreA:null},
+    {sortId:10, dateLabel:'Vendredi 19 juin', dateShort:'19/06', timeLabel:'01:00', home:'Czech Republic', away:'Mexico', group:'A', status:'scheduled', scoreH:null, scoreA:null},
+    {sortId:11, dateLabel:'Dimanche 21 juin', dateShort:'21/06', timeLabel:'22:00', home:'Uruguay', away:'Cape Verde', group:'H', status:'final', scoreH:2, scoreA:2},
+    
+    {sortId:12, dateLabel:'Lundi 22 juin', dateShort:'22/06', timeLabel:'12:00', home:'Argentina', away:'Austria', group:'J', status:'final', scoreH:2, scoreA:0},
+    {sortId:13, dateLabel:'Lundi 22 juin', dateShort:'22/06', timeLabel:'17:00', home:'France', away:'Iraq', group:'I', status:'final', scoreH:3, scoreA:0},
+    {sortId:14, dateLabel:'Lundi 22 juin', dateShort:'22/06', timeLabel:'20:00', home:'Norway', away:'Senegal', group:'I', status:'final', scoreH:3, scoreA:2},
+    {sortId:15, dateLabel:'Mardi 23 juin', dateShort:'23/06', timeLabel:'01:00', home:'Jordan', away:'Algeria', group:'J', status:'final', scoreH:1, scoreA:2},
+    
+    {sortId:16, dateLabel:'Mardi 23 juin', dateShort:'23/06', timeLabel:'12:00', home:'Portugal', away:'Uzbekistan', group:'K', status:'final', scoreH:5, scoreA:0},
+    {sortId:17, dateLabel:'Mardi 23 juin', dateShort:'23/06', timeLabel:'16:00', home:'England', away:'Ghana', group:'L', status:'final', scoreH:0, scoreA:0},
+    {sortId:18, dateLabel:'Mardi 23 juin', dateShort:'23/06', timeLabel:'19:00', home:'Panama', away:'Croatia', group:'L', status:'final', scoreH:0, scoreA:1},
+    {sortId:19, dateLabel:'Mardi 23 juin', dateShort:'23/06', timeLabel:'20:00', home:'Colombia', away:'DR Congo', group:'K', status:'final', scoreH:1, scoreA:0},
+    
+    // MATCHS À VENIR DU MERCREDI 24 JUIN (EN HEURE BELGE STRICTE)
+    {sortId:20, dateLabel:'Mercredi 24 juin', dateShort:'24/06', timeLabel:'21:00', home:'Switzerland', away:'Canada', group:'B', status:'scheduled', scoreH:null, scoreA:null},
+    {sortId:21, dateLabel:'Mercredi 24 juin', dateShort:'24/06', timeLabel:'21:00', home:'Bosnia-Herzegovina', away:'Qatar', group:'B', status:'scheduled', scoreH:null, scoreA:null},
+    {sortId:22, dateLabel:'Jeudi 25 juin', dateShort:'25/06', timeLabel:'00:00', home:'Scotland', away:'Brazil', group:'C', status:'scheduled', scoreH:null, scoreA:null},
+    {sortId:23, dateLabel:'Jeudi 25 juin', dateShort:'25/06', timeLabel:'00:00', home:'Morocco', away:'Haiti', group:'C', status:'scheduled', scoreH:null, scoreA:null},
+    {sortId:24, dateLabel:'Jeudi 25 juin', dateShort:'25/06', timeLabel:'03:00', home:'Czech Republic', away:'Mexico', group:'A', status:'scheduled', scoreH:null, scoreA:null},
+    {sortId:25, dateLabel:'Jeudi 25 juin', dateShort:'25/06', timeLabel:'03:00', home:'South Africa', away:'South Korea', group:'A', status:'scheduled', scoreH:null, scoreA:null},
+    
+    // JEUDI 25 JUIN (HEURE BELGE)
+    {sortId:26, dateLabel:'Jeudi 25 juin', dateShort:'25/06', timeLabel:'22:00', home:'Ecuador', away:'Germany', group:'E', status:'scheduled', scoreH:null, scoreA:null},
+    {sortId:27, dateLabel:'Jeudi 25 juin', dateShort:'25/06', timeLabel:'22:00', home:'Curacao', away:'Ivory Coast', group:'E', status:'scheduled', scoreH:null, scoreA:null},
+    {sortId:28, dateLabel:'Vendredi 26 juin', dateShort:'26/06', timeLabel:'01:00', home:'Tunisia', away:'Netherlands', group:'F', status:'scheduled', scoreH:null, scoreA:null},
+    {sortId:29, dateLabel:'Vendredi 26 juin', dateShort:'26/06', timeLabel:'01:00', home:'Japan', away:'Sweden', group:'F', status:'scheduled', scoreH:null, scoreA:null},
   ];
 
-  allMatches = rawFallback.map(function(m){
-    return {
-      dateObj: parseToUTCDate(m.date, m.time),
-      home: m.home,
-      away: m.away,
-      group: m.group,
-      status: m.status,
-      scoreH: m.scoreH,
-      scoreA: m.scoreA
-    };
-  });
-
-  allMatches.sort(function(a,b){ return a.dateObj.getTime() - b.dateObj.getTime(); });
+  allMatches = fallbackData;
+  allMatches.sort(function(a,b){ return a.sortId - b.sortId; });
 
   var groups = {};
   allMatches.forEach(function(m){
@@ -357,14 +313,23 @@ function loadFallback() {
       else{groups[g][m.home].nul++;groups[g][m.home].pts++;groups[g][m.away].nul++;groups[g][m.away].pts++;}
     }
   });
-  Object.keys(groups).forEach(function(g){
-    var t=Object.values(groups[g]);
-    t.sort(function(a,b){return b.pts-a.pts;});
-    allStandings[g]=t.map(function(t,i){return Object.assign({r:i+1},t);});
-  });
+  buildStandings(groups);
 
   document.getElementById('updateInfo').textContent = 'Données intégrées (Heure Belge)';
+  var btn = document.getElementById('btnRefresh');
+  var icon = document.getElementById('refreshIcon');
+  btn.disabled = false;
+  icon.className = '';
   renderTab(currentTab);
+}
+
+function buildStandings(groups) {
+  allStandings = {};
+  Object.keys(groups).forEach(function(g){
+    var t = Object.values(groups[g]);
+    t.sort(function(a,b){ return b.pts - a.pts; });
+    allStandings[g] = t.map(function(item,i){ return Object.assign({r:i+1},item); });
+  });
 }
 
 function matchRow(m) {
@@ -376,15 +341,12 @@ function matchRow(m) {
   var hc = hW?'mh w':aW?'mh l':'mh';
   var ac = aW?'ma w':hW?'ma l':'ma';
   var sc = done ? '<span class="sv">'+m.scoreH+' - '+m.scoreA+'</span>' : '<span class="vs">VS</span>';
-  
-  var hr = fmtHourBelge(m.dateObj);
-  var dtFormatted = fmtDateBelge(m.dateObj);
 
   return '<div'+cls+'>'
     +'<span class="'+hc+'">'+flag(m.home)+' '+fr(m.home)+'</span>'
     +'<div class="ms">'+sc+'</div>'
     +'<span class="'+ac+'">'+fr(m.away)+' '+flag(m.away)+'</span>'
-    +'<div class="mt"><div class="mg">Grp '+m.group+' '+dtFormatted+'</div><div class="mhr">'+hr+'</div></div>'
+    +'<div class="mt"><div class="mg">Grp '+m.group+' '+m.dateShort+'</div><div class="mhr">'+m.timeLabel+'</div></div>'
     +'</div>';
 }
 
@@ -419,11 +381,11 @@ function renderAccueil() {
   html += '<div class="stat"><div class="stat-n">'+totalFinished+'</div><div class="stat-l">Joués</div></div>';
   html += '<div class="stat"><div class="stat-n">12</div><div class="stat-l">Groupes</div></div>';
   html += '<div class="stat"><div class="stat-n">48</div><div class="stat-l">Nations</div></div>';
-  html += '<div class="stat"><div class="stat-n" style="font-family:Inter,sans-serif;font-size:1.6rem">&#127463;&#127466;</div><div class="stat-l">Grp G</div></div>';
+  html += '<div class="stat"><div class="stat-n" style="font-family:Inter,sans-serif;font-size:1.6rem">🇧🇪</div><div class="stat-l">Grp G</div></div>';
   html += '</div>';
 
   if(belG.length) {
-    html += '<div class="card bel"><div class="card-title bel">&#127463;&#127466; Belgique &mdash; Groupe G</div>'+standingsTable(belG)+'</div>';
+    html += '<div class="card bel"><div class="card-title bel">🇧🇪 Belgique &mdash; Groupe G</div>'+standingsTable(belG)+'</div>';
   }
 
   html += '<div class="card"><div class="card-title">Derniers résultats</div>';
@@ -441,35 +403,29 @@ function renderAccueil() {
 function renderResultats() {
   var finished = allMatches.filter(function(m){return m.status==='final';});
   
-  // Tri initial absolu du plus ancien au plus récent
-  finished.sort(function(a,b){ return a.dateObj.getTime() - b.dateObj.getTime(); });
-
-  var byDateTimestamp = {};
-  var uniqueDaysTimestamps = [];
+  // Groupement par libellé textuel de journée en conservant l'ordre chronologique strict
+  var byDate = {};
+  var dateOrder = [];
 
   finished.forEach(function(m){
-    var dayTimestamp = getMidnightTimestampBelge(m.dateObj);
-    if (!byDateTimestamp[dayTimestamp]) {
-      byDateTimestamp[dayTimestamp] = [];
-      uniqueDaysTimestamps.push(dayTimestamp);
+    var d = m.dateLabel;
+    if(!byDate[d]) {
+      byDate[d] = [];
+      dateOrder.push(d);
     }
-    byDateTimestamp[dayTimestamp].push(m);
+    byDate[d].push(m);
   });
   
-  // Tri strict mathématique des journées : de la plus récente en haut à la plus ancienne
-  uniqueDaysTimestamps.sort(function(a, b){ return b - a; });
+  // Journées de la plus récente (en haut) à la plus ancienne (en bas)
+  dateOrder.reverse();
   
   var html = '';
-  uniqueDaysTimestamps.forEach(function(ts){
-    // Utilise le premier match de cette journée pour récupérer le libellé textuel propre du jour
-    var labelDay = fmtDateLongBelge(byDateTimestamp[ts][0].dateObj);
-    html += '<div class="dsep">'+labelDay+'</div><div class="card">';
-    
-    // Les matchs au sein de ce bloc restent rangés chronologiquement du matin au soir (triés par .getTime())
-    byDateTimestamp[ts].forEach(function(m){ html += matchRow(m); });
+  dateOrder.forEach(function(d){
+    html += '<div class="dsep">'+d+'</div><div class="card">';
+    // Au sein d'une journée, les matchs sont classés dans l'ordre de déroulement (du matin au soir)
+    byDate[d].forEach(function(m){ html += matchRow(m); });
     html += '</div>';
   });
-  
   if(!html) html = '<div style="padding:30px;text-align:center;color:var(--grey)">Aucun résultat</div>';
   document.getElementById('resultats').innerHTML = html;
 }
@@ -502,35 +458,23 @@ function updateGrpBtns(btn) {
 function renderAvenir() {
   var upcoming = allMatches.filter(function(m){return m.status==='scheduled';});
   
-  upcoming.sort(function(a,b){ return a.dateObj.getTime() - b.dateObj.getTime(); });
-
-  var byDateTimestamp = {};
-  var uniqueDaysTimestamps = [];
+  var byDate = {};
+  var dateOrder = [];
 
   upcoming.forEach(function(m){
-    var dayTimestamp = getMidnightTimestampBelge(m.dateObj);
-    if (!byDateTimestamp[dayTimestamp]) {
-      byDateTimestamp[dayTimestamp] = [];
-      uniqueDaysTimestamps.push(dayTimestamp);
+    var d = m.dateLabel;
+    if(!byDate[d]) {
+      byDate[d] = [];
+      dateOrder.push(d);
     }
-    byDateTimestamp[dayTimestamp].push(m);
+    byDate[d].push(m);
   });
   
-  // Pour l'avenir, on garde l'ordre chronologique des journées (le jour le plus proche en premier)
-  uniqueDaysTimestamps.sort(function(a, b){ return a - b; });
-  
   var html = '';
-  uniqueDaysTimestamps.forEach(function(ts){
-    var labelDay = fmtDateLongBelge(byDateTimestamp[ts][0].dateObj);
-    html += '<div class="dsep">'+labelDay+'</div><div class="card">';
-    byDateTimestamp[ts].forEach(function(m){
-      var hr = fmtHourBelge(m.dateObj);
-      var dtFormatted = fmtDateBelge(m.dateObj);
-      html += '<div class="upm"><div class="upi">';
-      html += '<div class="upt"><div class="un">'+flag(m.home)+' '+fr(m.home)+'</div></div>';
-      html += '<div class="upc"><div class="ucg">Grp '+m.group+'</div><div class="uch">'+hr+'</div><div class="ucd">'+dtFormatted+'</div></div>';
-      html += '<div class="upt r"><div class="un">'+fr(m.away)+' '+flag(m.away)+'</div></div>';
-      html += '</div></div>';
+  dateOrder.forEach(function(d){
+    html += '<div class="dsep">'+d+'</div><div class="card">';
+    byDate[d].forEach(function(m){
+      html += matchRow(m);
     });
     html += '</div>';
   });
