@@ -14,8 +14,8 @@ jobs:
           python3 - << 'EOF'
           import json, urllib.request, datetime
 
-          FR={"Mexico":"Mexique","South Africa":"Afr. Sud","Korea Republic":"Coree S.","Czechia":"Tcheque","Czech Republic":"Tcheque","Canada":"Canada","Switzerland":"Suisse","Bosnia and Herzegovina":"Bosnie","Qatar":"Qatar","Brazil":"Bresil","Morocco":"Maroc","Scotland":"Ecosse","Haiti":"Haiti","United States":"Etats-Unis","USA":"Etats-Unis","Australia":"Australie","Paraguay":"Paraguay","Turkiye":"Turquie","Turkey":"Turquie","Germany":"Allemagne","Ivory Coast":"Cote Ivoire","Ecuador":"Equateur","Curacao":"Curacao","Netherlands":"Pays-Bas","Japan":"Japon","Sweden":"Suede","Tunisia":"Tunisie","Egypt":"Egypte","IR Iran":"Iran","Iran":"Iran","Belgium":"Belgique","New Zealand":"N-Zelande","Spain":"Espagne","Uruguay":"Uruguay","Cape Verde":"Cap-Vert","Saudi Arabia":"Arabie Sao.","France":"France","Norway":"Norvege","Senegal":"Senegal","Iraq":"Iraq","Argentina":"Argentine","Austria":"Autriche","Algeria":"Algerie","Jordan":"Jordanie","Colombia":"Colombie","Portugal":"Portugal","Congo DR":"Congo RD","DR Congo":"Congo RD","Uzbekistan":"Ouzbekistan","England":"Angleterre","Ghana":"Ghana","Croatia":"Croatie","Panama":"Panama"}
-          ABB={"Mexico":"MEX","South Africa":"RSA","Korea Republic":"KOR","Czechia":"CZE","Czech Republic":"CZE","Canada":"CAN","Switzerland":"SUI","Bosnia and Herzegovina":"BIH","Qatar":"QAT","Brazil":"BRA","Morocco":"MAR","Scotland":"SCO","Haiti":"HTI","United States":"USA","USA":"USA","Australia":"AUS","Paraguay":"PAR","Turkiye":"TUR","Turkey":"TUR","Germany":"GER","Ivory Coast":"CIV","Ecuador":"ECU","Curacao":"CUW","Netherlands":"NED","Japan":"JPN","Sweden":"SWE","Tunisia":"TUN","Egypt":"EGY","IR Iran":"IRN","Iran":"IRN","Belgium":"BEL","New Zealand":"NZL","Spain":"ESP","Uruguay":"URU","Cape Verde":"CPV","Saudi Arabia":"KSA","France":"FRA","Norway":"NOR","Senegal":"SEN","Iraq":"IRQ","Argentina":"ARG","Austria":"AUT","Algeria":"DZA","Jordan":"JOR","Colombia":"COL","Portugal":"POR","Congo DR":"COD","DR Congo":"COD","Uzbekistan":"UZB","England":"ENG","Ghana":"GHA","Croatia":"CRO","Panama":"PAN"}
+          FR={"Mexico":"Mexique","South Africa":"Afr. Sud","Korea Republic":"Coree S.","Czechia":"Tcheque","Czech Republic":"Tcheque","Canada":"Canada","Switzerland":"Suisse","Bosnia and Herzegovina":"Bosnie","Qatar":"Qatar","Brazil":"Bresil","Morocco":"Maroc","Scotland":"Ecosse","Haiti":"Haiti","United States":"Etats-Unis","Australia":"Australie","Paraguay":"Paraguay","Turkiye":"Turquie","Turkey":"Turquie","Germany":"Allemagne","Cote d'Ivoire":"Cote Ivoire","Ivory Coast":"Cote Ivoire","Ecuador":"Equateur","Curacao":"Curacao","Netherlands":"Pays-Bas","Japan":"Japon","Sweden":"Suede","Tunisia":"Tunisie","Egypt":"Egypte","IR Iran":"Iran","Iran":"Iran","Belgium":"Belgique","New Zealand":"N-Zelande","Spain":"Espagne","Uruguay":"Uruguay","Cape Verde":"Cap-Vert","Saudi Arabia":"Arabie Sao.","France":"France","Norway":"Norvege","Senegal":"Senegal","Iraq":"Iraq","Argentina":"Argentine","Austria":"Autriche","Algeria":"Algerie","Jordan":"Jordanie","Colombia":"Colombie","Portugal":"Portugal","Congo DR":"Congo RD","DR Congo":"Congo RD","Uzbekistan":"Ouzbekistan","England":"Angleterre","Ghana":"Ghana","Croatia":"Croatie","Panama":"Panama"}
+          ABB={"Mexico":"MEX","South Africa":"RSA","Korea Republic":"KOR","Czechia":"CZE","Czech Republic":"CZE","Canada":"CAN","Switzerland":"SUI","Bosnia and Herzegovina":"BIH","Qatar":"QAT","Brazil":"BRA","Morocco":"MAR","Scotland":"SCO","Haiti":"HTI","United States":"USA","Australia":"AUS","Paraguay":"PAR","Turkiye":"TUR","Turkey":"TUR","Germany":"GER","Cote d'Ivoire":"CIV","Ivory Coast":"CIV","Ecuador":"ECU","Curacao":"CUW","Netherlands":"NED","Japan":"JPN","Sweden":"SWE","Tunisia":"TUN","Egypt":"EGY","IR Iran":"IRN","Iran":"IRN","Belgium":"BEL","New Zealand":"NZL","Spain":"ESP","Uruguay":"URU","Cape Verde":"CPV","Saudi Arabia":"KSA","France":"FRA","Norway":"NOR","Senegal":"SEN","Iraq":"IRQ","Argentina":"ARG","Austria":"AUT","Algeria":"DZA","Jordan":"JOR","Colombia":"COL","Portugal":"POR","Congo DR":"COD","DR Congo":"COD","Uzbekistan":"UZB","England":"ENG","Ghana":"GHA","Croatia":"CRO","Panama":"PAN"}
 
           def safe_int(v):
               try:
@@ -23,33 +23,28 @@ jobs:
               except:
                   return 0
 
-          def utc_to_cest(iso):
-              try:
-                  dt = datetime.datetime.strptime(iso[:19], "%Y-%m-%dT%H:%M:%S")
-                  dt = dt + datetime.timedelta(hours=2)
-                  return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
-              except:
-                  return iso
+          # Normalise le nom pour matching
+          def norm(n):
+              return (n or "").lower().strip().replace("'","").replace("-","")
 
-          # Source 1: TheStatsAPI - horaires UTC fiables
+          # Etape 1: TheStatsAPI - horaires UTC fiables pour tous les 104 matchs
           fixtures = {}
           try:
               r = urllib.request.urlopen("https://www.thestatsapi.com/world-cup/data/fixtures.json", timeout=10)
               data = json.loads(r.read())
-              items = data if isinstance(data, list) else data.get("fixtures", data.get("matches", []))
-              for m in items:
-                  h = m.get("home_team","")
-                  a = m.get("away_team","")
-                  kickoff = m.get("kickoff_utc") or m.get("date","")
-                  grp = m.get("group","") or m.get("group_name","")
-                  if h and a and kickoff:
-                      key = ABB.get(h,h[:3].upper()) + "_" + ABB.get(a,a[:3].upper())
-                      fixtures[key] = {"start": kickoff, "group": grp}
-              print(f"TheStatsAPI: {len(fixtures)} matchs")
+              for m in data.get("fixtures", []):
+                  h = norm(m.get("homeTeam",""))
+                  a = norm(m.get("awayTeam",""))
+                  key = h + "__" + a
+                  fixtures[key] = {
+                      "start": m.get("kickoffUtc",""),
+                      "group": m.get("group","")
+                  }
+              print(f"TheStatsAPI: {len(fixtures)} matchs charges")
           except Exception as e:
               print(f"TheStatsAPI failed: {e}")
 
-          # Source 2: worldcup26.ir - scores live
+          # Etape 2: worldcup26.ir - scores live et statuts
           try:
               r = urllib.request.urlopen("https://worldcup26.ir/get/games", timeout=10)
               raw = json.loads(r.read())
@@ -69,6 +64,7 @@ jobs:
               a = m.get("away_team_name_en") or m.get("away_team_label") or m.get("away_team","")
               if not h or not a:
                   continue
+
               ha = ABB.get(h, h[:3].upper())
               aa = ABB.get(a, a[:3].upper())
               fin = str(m.get("finished","")).upper() == "TRUE"
@@ -79,18 +75,23 @@ jobs:
               sA = safe_int(m.get("away_score"))
               el = elapsed if status == "in_progress" else ""
 
-              # Heure: TheStatsAPI en priorite, sinon worldcup26.ir converti
-              key = ha + "_" + aa
-              if key in fixtures:
-                  start = utc_to_cest(fixtures[key]["start"])
-                  grp = fixtures[key]["group"] or g
+              # Etape 3: correspondance par nom normalise
+              key = norm(h) + "__" + norm(a)
+              key_rev = norm(a) + "__" + norm(h)  # essai inverse si besoin
+              fix = fixtures.get(key) or fixtures.get(key_rev)
+
+              if fix:
+                  start = fix["start"]  # UTC pur - index.html convertit en CEST
+                  grp = fix["group"] or g
               else:
+                  # Fallback: garder la date de worldcup26.ir
                   try:
                       dt = datetime.datetime.strptime(m.get("local_date",""), "%m/%d/%Y %H:%M")
-                      start = utc_to_cest(dt.strftime("%Y-%m-%dT%H:%M:%SZ"))
+                      start = dt.strftime("%Y-%m-%dT%H:%M:%SZ")
                   except:
                       start = ""
                   grp = g
+                  print(f"No match for: {h} vs {a}")
 
               games.append({"id":str(m.get("id","")),"status":status,"start":start,"home":ha,"away":aa,"homeN":FR.get(h,h),"awayN":FR.get(a,a),"group":grp,"scoreH":sH,"scoreA":sA,"elapsed":el})
 
@@ -112,7 +113,7 @@ jobs:
                   t["r"] = i+1; st.append(t)
 
           now = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-          out = {"updated":now,"source":"worldcup26.ir+thestatsapi","games":games,"standings":st}
+          out = {"updated":now,"source":"thestatsapi+worldcup26","games":games,"standings":st}
           with open("worldcup.json","w",encoding="utf-8") as f:
               json.dump(out,f,ensure_ascii=False)
           live = [g for g in games if g["status"]=="in_progress"]
