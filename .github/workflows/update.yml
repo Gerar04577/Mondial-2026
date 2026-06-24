@@ -14,20 +14,47 @@ jobs:
           python3 - << 'EOF'
           import json, urllib.request, datetime
 
-          FR={"Mexico":"Mexique","South Africa":"Afr. Sud","South Korea":"Coree S.","Czechia":"Tcheque","Czech Republic":"Tcheque","Canada":"Canada","Switzerland":"Suisse","Bosnia and Herzegovina":"Bosnie","Qatar":"Qatar","Brazil":"Bresil","Morocco":"Maroc","Scotland":"Ecosse","Haiti":"Haiti","United States":"Etats-Unis","USA":"Etats-Unis","Australia":"Australie","Paraguay":"Paraguay","Turkiye":"Turquie","Turkey":"Turquie","Germany":"Allemagne","Ivory Coast":"Cote Ivoire","Ecuador":"Equateur","Curacao":"Curacao","Netherlands":"Pays-Bas","Japan":"Japon","Sweden":"Suede","Tunisia":"Tunisie","Egypt":"Egypte","IR Iran":"Iran","Iran":"Iran","Belgium":"Belgique","New Zealand":"N-Zelande","Spain":"Espagne","Uruguay":"Uruguay","Cape Verde":"Cap-Vert","Saudi Arabia":"Arabie Sao.","France":"France","Norway":"Norvege","Senegal":"Senegal","Iraq":"Iraq","Argentina":"Argentine","Austria":"Autriche","Algeria":"Algerie","Jordan":"Jordanie","Colombia":"Colombie","Portugal":"Portugal","Congo DR":"Congo RD","DR Congo":"Congo RD","Uzbekistan":"Ouzbekistan","England":"Angleterre","Ghana":"Ghana","Croatia":"Croatie","Panama":"Panama","Korea Republic":"Coree S."}
-          ABB={"Mexico":"MEX","South Africa":"RSA","South Korea":"KOR","Czechia":"CZE","Czech Republic":"CZE","Canada":"CAN","Switzerland":"SUI","Bosnia and Herzegovina":"BIH","Qatar":"QAT","Brazil":"BRA","Morocco":"MAR","Scotland":"SCO","Haiti":"HTI","United States":"USA","USA":"USA","Australia":"AUS","Paraguay":"PAR","Turkiye":"TUR","Turkey":"TUR","Germany":"GER","Ivory Coast":"CIV","Ecuador":"ECU","Curacao":"CUW","Netherlands":"NED","Japan":"JPN","Sweden":"SWE","Tunisia":"TUN","Egypt":"EGY","IR Iran":"IRN","Iran":"IRN","Belgium":"BEL","New Zealand":"NZL","Spain":"ESP","Uruguay":"URU","Cape Verde":"CPV","Saudi Arabia":"KSA","France":"FRA","Norway":"NOR","Senegal":"SEN","Iraq":"IRQ","Argentina":"ARG","Austria":"AUT","Algeria":"DZA","Jordan":"JOR","Colombia":"COL","Portugal":"POR","Congo DR":"COD","DR Congo":"COD","Uzbekistan":"UZB","England":"ENG","Ghana":"GHA","Croatia":"CRO","Panama":"PAN","Korea Republic":"KOR"}
+          FR={"Mexico":"Mexique","South Africa":"Afr. Sud","Korea Republic":"Coree S.","Czechia":"Tcheque","Czech Republic":"Tcheque","Canada":"Canada","Switzerland":"Suisse","Bosnia and Herzegovina":"Bosnie","Qatar":"Qatar","Brazil":"Bresil","Morocco":"Maroc","Scotland":"Ecosse","Haiti":"Haiti","United States":"Etats-Unis","USA":"Etats-Unis","Australia":"Australie","Paraguay":"Paraguay","Turkiye":"Turquie","Turkey":"Turquie","Germany":"Allemagne","Ivory Coast":"Cote Ivoire","Ecuador":"Equateur","Curacao":"Curacao","Netherlands":"Pays-Bas","Japan":"Japon","Sweden":"Suede","Tunisia":"Tunisie","Egypt":"Egypte","IR Iran":"Iran","Iran":"Iran","Belgium":"Belgique","New Zealand":"N-Zelande","Spain":"Espagne","Uruguay":"Uruguay","Cape Verde":"Cap-Vert","Saudi Arabia":"Arabie Sao.","France":"France","Norway":"Norvege","Senegal":"Senegal","Iraq":"Iraq","Argentina":"Argentine","Austria":"Autriche","Algeria":"Algerie","Jordan":"Jordanie","Colombia":"Colombie","Portugal":"Portugal","Congo DR":"Congo RD","DR Congo":"Congo RD","Uzbekistan":"Ouzbekistan","England":"Angleterre","Ghana":"Ghana","Croatia":"Croatie","Panama":"Panama"}
+          ABB={"Mexico":"MEX","South Africa":"RSA","Korea Republic":"KOR","Czechia":"CZE","Czech Republic":"CZE","Canada":"CAN","Switzerland":"SUI","Bosnia and Herzegovina":"BIH","Qatar":"QAT","Brazil":"BRA","Morocco":"MAR","Scotland":"SCO","Haiti":"HTI","United States":"USA","USA":"USA","Australia":"AUS","Paraguay":"PAR","Turkiye":"TUR","Turkey":"TUR","Germany":"GER","Ivory Coast":"CIV","Ecuador":"ECU","Curacao":"CUW","Netherlands":"NED","Japan":"JPN","Sweden":"SWE","Tunisia":"TUN","Egypt":"EGY","IR Iran":"IRN","Iran":"IRN","Belgium":"BEL","New Zealand":"NZL","Spain":"ESP","Uruguay":"URU","Cape Verde":"CPV","Saudi Arabia":"KSA","France":"FRA","Norway":"NOR","Senegal":"SEN","Iraq":"IRQ","Argentina":"ARG","Austria":"AUT","Algeria":"DZA","Jordan":"JOR","Colombia":"COL","Portugal":"POR","Congo DR":"COD","DR Congo":"COD","Uzbekistan":"UZB","England":"ENG","Ghana":"GHA","Croatia":"CRO","Panama":"PAN"}
 
           def safe_int(v):
               try:
-                  return int(v) if v not in (None, "null", "", "NULL") else 0
+                  return int(v) if v not in (None,"null","","NULL") else 0
               except:
                   return 0
 
+          def utc_to_cest(iso):
+              try:
+                  dt = datetime.datetime.strptime(iso[:19], "%Y-%m-%dT%H:%M:%S")
+                  dt = dt + datetime.timedelta(hours=2)
+                  return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+              except:
+                  return iso
+
+          # Source 1: TheStatsAPI - horaires UTC fiables
+          fixtures = {}
+          try:
+              r = urllib.request.urlopen("https://www.thestatsapi.com/world-cup/data/fixtures.json", timeout=10)
+              data = json.loads(r.read())
+              items = data if isinstance(data, list) else data.get("fixtures", data.get("matches", []))
+              for m in items:
+                  h = m.get("home_team","")
+                  a = m.get("away_team","")
+                  kickoff = m.get("kickoff_utc") or m.get("date","")
+                  grp = m.get("group","") or m.get("group_name","")
+                  if h and a and kickoff:
+                      key = ABB.get(h,h[:3].upper()) + "_" + ABB.get(a,a[:3].upper())
+                      fixtures[key] = {"start": kickoff, "group": grp}
+              print(f"TheStatsAPI: {len(fixtures)} matchs")
+          except Exception as e:
+              print(f"TheStatsAPI failed: {e}")
+
+          # Source 2: worldcup26.ir - scores live
           try:
               r = urllib.request.urlopen("https://worldcup26.ir/get/games", timeout=10)
               raw = json.loads(r.read())
           except Exception as e:
-              print(f"API failed: {e}")
+              print(f"worldcup26.ir failed: {e}")
               exit(0)
 
           items = raw if isinstance(raw, list) else raw.get("games", [])
@@ -35,56 +62,60 @@ jobs:
           sm = {}
 
           for m in items:
-              g = m.get("group", "")
-              if not g or g in ("R32", "R16", "QF", "SF", "F", "3P"):
+              g = m.get("group","")
+              if not g or g in ("R32","R16","QF","SF","F","3P"):
                   continue
-              h = m.get("home_team_name_en") or m.get("home_team_label") or m.get("home_team", "")
-              a = m.get("away_team_name_en") or m.get("away_team_label") or m.get("away_team", "")
+              h = m.get("home_team_name_en") or m.get("home_team_label") or m.get("home_team","")
+              a = m.get("away_team_name_en") or m.get("away_team_label") or m.get("away_team","")
               if not h or not a:
                   continue
               ha = ABB.get(h, h[:3].upper())
               aa = ABB.get(a, a[:3].upper())
-              fin = str(m.get("finished", "")).upper() == "TRUE"
-              elapsed = str(m.get("time_elapsed", "") or "")
-              inp = elapsed.lower() not in ("", "notstarted", "finished")
+              fin = str(m.get("finished","")).upper() == "TRUE"
+              elapsed = str(m.get("time_elapsed","") or "")
+              inp = elapsed.lower() not in ("","notstarted","finished")
               status = "final" if fin else ("in_progress" if inp else "scheduled")
               sH = safe_int(m.get("home_score"))
               sA = safe_int(m.get("away_score"))
-              try:
-                  dt = datetime.datetime.strptime(m.get("local_date", ""), "%m/%d/%Y %H:%M")
-                  start = dt.strftime("%Y-%m-%dT%H:%M:%SZ")
-              except:
-                  start = ""
               el = elapsed if status == "in_progress" else ""
-              games.append({"id": str(m.get("id", "")), "status": status, "start": start, "home": ha, "away": aa, "homeN": FR.get(h, h), "awayN": FR.get(a, a), "group": g, "scoreH": sH, "scoreA": sA, "elapsed": el})
-              if g not in sm:
-                  sm[g] = {}
-              for t, ab in [(h, ha), (a, aa)]:
-                  if ab not in sm[g]:
-                      sm[g][ab] = {"a": ab, "n": FR.get(t, t), "g": g, "j": 0, "v": 0, "nul": 0, "d": 0, "pts": 0}
+
+              # Heure: TheStatsAPI en priorite, sinon worldcup26.ir converti
+              key = ha + "_" + aa
+              if key in fixtures:
+                  start = utc_to_cest(fixtures[key]["start"])
+                  grp = fixtures[key]["group"] or g
+              else:
+                  try:
+                      dt = datetime.datetime.strptime(m.get("local_date",""), "%m/%d/%Y %H:%M")
+                      start = utc_to_cest(dt.strftime("%Y-%m-%dT%H:%M:%SZ"))
+                  except:
+                      start = ""
+                  grp = g
+
+              games.append({"id":str(m.get("id","")),"status":status,"start":start,"home":ha,"away":aa,"homeN":FR.get(h,h),"awayN":FR.get(a,a),"group":grp,"scoreH":sH,"scoreA":sA,"elapsed":el})
+
+              if grp not in sm:
+                  sm[grp] = {}
+              for t, ab in [(h,ha),(a,aa)]:
+                  if ab not in sm[grp]:
+                      sm[grp][ab] = {"a":ab,"n":FR.get(t,t),"g":grp,"j":0,"v":0,"nul":0,"d":0,"pts":0}
               if fin:
-                  sm[g][ha]["j"] += 1
-                  sm[g][aa]["j"] += 1
-                  if sH > sA:
-                      sm[g][ha]["v"] += 1; sm[g][ha]["pts"] += 3; sm[g][aa]["d"] += 1
-                  elif sA > sH:
-                      sm[g][aa]["v"] += 1; sm[g][aa]["pts"] += 3; sm[g][ha]["d"] += 1
-                  else:
-                      sm[g][ha]["nul"] += 1; sm[g][ha]["pts"] += 1
-                      sm[g][aa]["nul"] += 1; sm[g][aa]["pts"] += 1
+                  sm[grp][ha]["j"]+=1; sm[grp][aa]["j"]+=1
+                  if sH>sA: sm[grp][ha]["v"]+=1; sm[grp][ha]["pts"]+=3; sm[grp][aa]["d"]+=1
+                  elif sA>sH: sm[grp][aa]["v"]+=1; sm[grp][aa]["pts"]+=3; sm[grp][ha]["d"]+=1
+                  else: sm[grp][ha]["nul"]+=1; sm[grp][ha]["pts"]+=1; sm[grp][aa]["nul"]+=1; sm[grp][aa]["pts"]+=1
 
           st = []
-          for g in sorted(sm.keys()):
-              ts = sorted(sm[g].values(), key=lambda x: -x["pts"])
-              for i, t in enumerate(ts):
-                  t["r"] = i + 1
-                  st.append(t)
+          for grp in sorted(sm.keys()):
+              ts = sorted(sm[grp].values(), key=lambda x: -x["pts"])
+              for i,t in enumerate(ts):
+                  t["r"] = i+1; st.append(t)
 
           now = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-          out = {"updated": now, "source": "worldcup26.ir", "games": games, "standings": st}
-          with open("worldcup.json", "w", encoding="utf-8") as f:
-              json.dump(out, f, ensure_ascii=False)
-          live = [g for g in games if g["status"] == "in_progress"]
+          out = {"updated":now,"source":"worldcup26.ir+thestatsapi","games":games,"standings":st}
+          with open("worldcup.json","w",encoding="utf-8") as f:
+              json.dump(out,f,ensure_ascii=False)
+          live = [g for g in games if g["status"]=="in_progress"]
           print(f"OK: {len(games)} matchs, {len(live)} en cours")
           EOF
       - run: |
