@@ -7,125 +7,99 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Mondial 2026">
 <title>Mondial 2026</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:#0a3d1f;color:#f5f5f0;font-family:Inter,sans-serif;min-height:100vh;}
 :root{--gold:#e8b84b;--grey:#a8a89e;--card:#0f1a0f;--card2:#141f14;--red:#e84b4b;--green:#4be87a;--bel:#ed2939;}
-.bebas{font-family:'Bebas Neue',sans-serif;}
-
-/* HEADER */
 .header{background:linear-gradient(135deg,#000 0%,#0a3d1f 60%,#0d5229 100%);border-bottom:2px solid var(--gold);position:sticky;top:0;z-index:100;}
-.header-top{text-align:center;padding:14px 12px 8px;}
-.header-top h1{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:4px;color:var(--gold);line-height:1;}
-.header-top p{color:var(--grey);font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
-.header-top small{font-size:0.6rem;color:var(--grey);display:block;margin-top:4px;}
+.header-top{text-align:center;padding:12px 12px 6px;}
+.header-top h1{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:4px;color:var(--gold);line-height:1;}
+.header-top p{color:var(--grey);font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
+.update-bar{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px;}
+.update-info{font-size:0.62rem;color:var(--grey);}
+.btn-refresh{background:rgba(232,184,75,0.15);border:1px solid rgba(232,184,75,0.5);border-radius:20px;padding:4px 14px;color:var(--gold);font-size:0.72rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;}
+.btn-refresh:disabled{opacity:0.5;}
+.spin{display:inline-block;animation:spin 1s linear infinite;}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
 .tabs{display:flex;overflow-x:auto;border-top:1px solid rgba(232,184,75,0.15);}
 .tab{flex:0 0 auto;padding:9px 14px;border:none;background:transparent;color:var(--grey);border-bottom:3px solid transparent;font-weight:600;font-size:0.7rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
 .tab.active{color:var(--gold);border-bottom:3px solid var(--gold);}
-
-/* CONTENT */
 .main{max-width:700px;margin:0 auto;padding:0 12px 50px;}
 .section{display:none;}.section.active{display:block;}
-
-/* CARDS */
 .card{background:var(--card);border:1px solid rgba(232,184,75,0.15);border-radius:10px;margin-bottom:12px;overflow:hidden;}
 .card.bel{border-color:rgba(237,41,57,0.5);}
 .card-title{background:var(--card2);padding:7px 14px;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;color:var(--gold);border-bottom:1px solid rgba(232,184,75,0.12);}
 .card-title.bel{color:var(--bel);}
-
-/* STATS ROW */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0;}
 .stat{background:var(--card);border:1px solid rgba(232,184,75,0.15);border-radius:10px;padding:10px 6px;text-align:center;}
 .stat-n{font-family:'Bebas Neue',sans-serif;font-size:1.9rem;color:var(--gold);line-height:1;}
-.stat-n.emoji{font-family:Inter,sans-serif;font-size:1.6rem;}
 .stat-l{font-size:0.58rem;color:var(--grey);text-transform:uppercase;letter-spacing:1px;margin-top:3px;}
-
-/* MATCH ROW */
 .match{display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.05);}
 .match:last-child{border-bottom:none;}
-.match.bel-match{background:rgba(237,41,57,0.05);border-left:3px solid var(--bel);}
-.match:not(.bel-match){border-left:3px solid transparent;}
-.match-home{flex:1;font-weight:500;font-size:0.85rem;}
-.match-away{flex:1;text-align:right;font-weight:500;font-size:0.85rem;}
-.match-home.winner,.match-away.winner{font-weight:700;}
-.match-home.loser,.match-away.loser{opacity:0.5;}
-.match-score{min-width:76px;text-align:center;}
-.score-val{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--gold);letter-spacing:2px;}
-.score-vs{color:var(--grey);font-size:0.7rem;font-weight:600;}
-.match-time{min-width:72px;text-align:right;margin-left:8px;}
-.match-grp{font-size:0.6rem;color:var(--grey);}
-.match-hour{font-size:0.82rem;font-weight:600;color:#f5f5f0;}
-
-/* STANDINGS */
+.match.bel-m{background:rgba(237,41,57,0.05);border-left:3px solid var(--bel);}
+.match:not(.bel-m){border-left:3px solid transparent;}
+.mh{flex:1;font-weight:500;font-size:0.85rem;}
+.ma{flex:1;text-align:right;font-weight:500;font-size:0.85rem;}
+.mh.w,.ma.w{font-weight:700;}
+.mh.l,.ma.l{opacity:0.5;}
+.ms{min-width:76px;text-align:center;}
+.sv{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--gold);letter-spacing:2px;}
+.vs{color:var(--grey);font-size:0.7rem;font-weight:600;}
+.mt{min-width:72px;text-align:right;margin-left:8px;}
+.mg{font-size:0.6rem;color:var(--grey);}
+.mhr{font-size:0.82rem;font-weight:600;color:#f5f5f0;}
 .standings{width:100%;border-collapse:collapse;font-size:0.82rem;}
 .standings thead tr{background:var(--card2);color:var(--grey);font-size:0.6rem;text-transform:uppercase;}
 .standings th{padding:6px 4px;text-align:center;}
 .standings th:first-child{padding:6px 10px;text-align:left;}
 .standings td{padding:8px 4px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.05);}
 .standings td:first-child{padding:8px 10px;text-align:left;font-weight:600;}
-.standings tr.bel-row{background:rgba(237,41,57,0.08);}
-.standings tr.bel-row td:first-child{color:var(--bel);}
-.rank-badge{display:inline-flex;width:18px;height:18px;align-items:center;justify-content:center;border-radius:50%;font-size:0.62rem;font-weight:700;margin-right:6px;}
-.rank-1{background:var(--gold);color:#000;}
-.rank-2{background:rgba(232,184,75,0.3);color:var(--gold);}
-.rank-3,.rank-4{background:rgba(255,255,255,0.1);color:var(--grey);}
-.v-col{color:var(--green);}
-.d-col{color:var(--red);}
-.pts-col{color:var(--gold);font-weight:700;font-size:0.95rem;}
-
-/* GROUP FILTER */
+.standings tr.br{background:rgba(237,41,57,0.08);}
+.standings tr.br td:first-child{color:var(--bel);}
+.rb{display:inline-flex;width:18px;height:18px;align-items:center;justify-content:center;border-radius:50%;font-size:0.62rem;font-weight:700;margin-right:6px;}
+.r1{background:var(--gold);color:#000;}.r2{background:rgba(232,184,75,0.3);color:var(--gold);}.r3,.r4{background:rgba(255,255,255,0.1);color:var(--grey);}
+.vc{color:var(--green);}.dc{color:var(--red);}.pc{color:var(--gold);font-weight:700;font-size:0.95rem;}
 .grp-nav{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 10px;}
 .grp-btn{padding:4px 11px;border-radius:20px;border:1px solid rgba(232,184,75,0.3);background:transparent;color:var(--grey);font-size:0.7rem;font-weight:600;cursor:pointer;}
 .grp-btn.active{background:var(--gold);color:#000;border-color:var(--gold);}
-
-/* DATE SEPARATOR */
-.date-sep{font-family:'Bebas Neue',sans-serif;font-size:0.95rem;letter-spacing:3px;color:var(--grey);padding:14px 0 6px;text-transform:uppercase;}
-
-/* UPCOMING MATCH */
-.upcoming-match{padding:11px 14px;border-bottom:1px solid rgba(255,255,255,0.05);}
-.upcoming-match:last-child{border-bottom:none;}
-.upcoming-inner{display:flex;align-items:center;gap:8px;}
-.upcoming-team{flex:1;}
-.upcoming-team.right{text-align:right;}
-.upcoming-name{font-weight:600;font-size:0.85rem;}
-.prob-bar{height:3px;background:rgba(255,255,255,0.1);border-radius:2px;margin-top:4px;overflow:hidden;}
-.prob-fill{height:100%;background:var(--gold);border-radius:2px;}
-.prob-fill.right{float:right;}
-.prob-pct{font-size:0.62rem;color:var(--grey);margin-top:2px;}
-.prob-pct.right{text-align:right;}
-.upcoming-center{text-align:center;min-width:64px;}
-.upcoming-grp{font-size:0.58rem;color:var(--grey);}
-.upcoming-hour{font-weight:700;color:#f5f5f0;font-size:0.88rem;}
-.upcoming-date{font-size:0.6rem;color:var(--grey);}
-
-/* TABLEAU */
+.dsep{font-family:'Bebas Neue',sans-serif;font-size:0.95rem;letter-spacing:3px;color:var(--grey);padding:14px 0 6px;text-transform:uppercase;}
+.upm{padding:11px 14px;border-bottom:1px solid rgba(255,255,255,0.05);}
+.upm:last-child{border-bottom:none;}
+.upi{display:flex;align-items:center;gap:8px;}
+.upt{flex:1;}.upt.r{text-align:right;}
+.un{font-weight:600;font-size:0.85rem;}
+.pb{height:3px;background:rgba(255,255,255,0.1);border-radius:2px;margin-top:4px;overflow:hidden;}
+.pf{height:100%;background:var(--gold);border-radius:2px;}
+.pp{font-size:0.62rem;color:var(--grey);margin-top:2px;}
+.pp.r{text-align:right;}
+.upc{text-align:center;min-width:64px;}
+.ucg{font-size:0.58rem;color:var(--grey);}
+.uch{font-weight:700;color:#f5f5f0;font-size:0.88rem;}
+.ucd{font-size:0.6rem;color:var(--grey);}
 .info-box{background:rgba(232,184,75,0.08);border:1px solid rgba(232,184,75,0.2);border-radius:8px;padding:9px 14px;margin:14px 0;font-size:0.76rem;color:var(--grey);text-align:center;}
-.phase-sep{display:flex;align-items:center;gap:10px;padding:16px 0 5px;}
-.phase-line{flex:1;height:1px;background:rgba(232,184,75,0.2);}
-.phase-title{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:3px;color:var(--gold);}
-.phase-dates{font-size:0.63rem;color:var(--grey);text-align:center;letter-spacing:1px;margin-bottom:10px;}
-.bracket-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:4px;}
+.psep{display:flex;align-items:center;gap:10px;padding:16px 0 5px;}
+.pl{flex:1;height:1px;background:rgba(232,184,75,0.2);}
+.pt{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:3px;color:var(--gold);}
+.pd{font-size:0.63rem;color:var(--grey);text-align:center;letter-spacing:1px;margin-bottom:10px;}
+.bg{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:4px;}
 .tbd{background:var(--card);border:1px dashed rgba(232,184,75,0.2);border-radius:8px;overflow:hidden;opacity:0.75;}
-.tbd-head{background:var(--card2);padding:3px 10px;font-size:0.58rem;color:var(--grey);display:flex;justify-content:space-between;}
-.tbd-team{padding:7px 10px;font-size:0.76rem;color:var(--grey);font-style:italic;}
-.tbd-team+.tbd-team{border-top:1px solid rgba(255,255,255,0.04);}
-.finale-wrap{max-width:380px;margin:0 auto 8px;}
-.finale-card{background:var(--card);border:2px solid rgba(232,184,75,0.5);border-radius:8px;overflow:hidden;}
-.finale-head{background:rgba(232,184,75,0.15);padding:4px 10px;font-size:0.6rem;color:var(--gold);letter-spacing:1px;display:flex;justify-content:space-between;}
-.finale-team{padding:14px 12px;font-size:0.9rem;color:var(--grey);font-style:italic;}
-.finale-team+.finale-team{border-top:1px solid rgba(255,255,255,0.05);}
+.tbdh{background:var(--card2);padding:3px 10px;font-size:0.58rem;color:var(--grey);display:flex;justify-content:space-between;}
+.tbdt{padding:7px 10px;font-size:0.76rem;color:var(--grey);font-style:italic;}
+.tbdt+.tbdt{border-top:1px solid rgba(255,255,255,0.04);}
+.fw{max-width:380px;margin:0 auto 8px;}
+.fc{background:var(--card);border:2px solid rgba(232,184,75,0.5);border-radius:8px;overflow:hidden;}
+.fh{background:rgba(232,184,75,0.15);padding:4px 10px;font-size:0.6rem;color:var(--gold);letter-spacing:1px;display:flex;justify-content:space-between;}
+.ft{padding:14px 12px;font-size:0.9rem;color:var(--grey);font-style:italic;}
+.ft+.ft{border-top:1px solid rgba(255,255,255,0.05);}
 .trophy{text-align:center;font-size:3rem;padding:20px;}
-.finale-sep{display:flex;align-items:center;gap:10px;padding:18px 0 6px;}
-.finale-line{flex:1;height:1px;background:rgba(232,184,75,0.4);}
-.finale-label{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:3px;color:#fff;}
-.finale-info{font-size:0.67rem;color:var(--grey);text-align:center;letter-spacing:1px;margin-bottom:10px;}
-
-@media(max-width:400px){
-  .bracket-grid{grid-template-columns:1fr;}
-  .stats{grid-template-columns:repeat(2,1fr);}
-}
+.fl{display:flex;align-items:center;gap:10px;padding:18px 0 6px;}
+.fll{flex:1;height:1px;background:rgba(232,184,75,0.4);}
+.flb{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:3px;color:#fff;}
+.fi{font-size:0.67rem;color:var(--grey);text-align:center;letter-spacing:1px;margin-bottom:10px;}
+.err{background:rgba(232,75,75,0.15);border:1px solid rgba(232,75,75,0.4);border-radius:8px;padding:8px 14px;margin:12px 0;font-size:0.78rem;color:var(--red);text-align:center;}
+.loading{text-align:center;padding:40px;color:var(--grey);}
+@media(max-width:400px){.bg{grid-template-columns:1fr;}.stats{grid-template-columns:repeat(2,1fr);}}
 </style>
 </head>
 <body>
@@ -134,7 +108,12 @@ body{background:#0a3d1f;color:#f5f5f0;font-family:Inter,sans-serif;min-height:10
   <div class="header-top">
     <h1>Mondial 2026</h1>
     <p>USA &middot; Canada &middot; Mexique</p>
-    <small id="updateTime">Donnees du 24/06/2026 17:33 CEST</small>
+    <div class="update-bar">
+      <span class="update-info" id="updateInfo">Chargement...</span>
+      <button class="btn-refresh" id="btnRefresh" onclick="loadData()">
+        <span id="refreshIcon">&#8635;</span> Mettre a jour
+      </button>
+    </div>
   </div>
   <div class="tabs">
     <button class="tab active" onclick="showTab('accueil',this)">&#127968; Accueil</button>
@@ -146,330 +125,397 @@ body{background:#0a3d1f;color:#f5f5f0;font-family:Inter,sans-serif;min-height:10
 </div>
 
 <div class="main">
-
-<!-- ACCUEIL -->
-<div id="accueil" class="section active">
-  <div class="stats">
-    <div class="stat"><div class="stat-n">10</div><div class="stat-l">Joues</div></div>
-    <div class="stat"><div class="stat-n">12</div><div class="stat-l">Groupes</div></div>
-    <div class="stat"><div class="stat-n">48</div><div class="stat-l">Nations</div></div>
-    <div class="stat"><div class="stat-n emoji">&#127463;&#127466;</div><div class="stat-l">Grp G</div></div>
-  </div>
-
-  <div class="card bel">
-    <div class="card-title bel">&#127463;&#127466; Belgique &mdash; Groupe G</div>
-    <table class="standings">
-      <thead><tr><th style="text-align:left">Equipe</th><th>J</th><th class="v-col">V</th><th>N</th><th class="d-col">D</th><th class="pts-col">Pts</th></tr></thead>
-      <tbody>
-        <tr><td><span class="rank-badge rank-1">1</span>&#127466;&#127468; Egypte</td><td>2</td><td class="v-col">1</td><td>1</td><td class="d-col">0</td><td class="pts-col">4</td></tr>
-        <tr><td><span class="rank-badge rank-2">2</span>&#127470;&#127479; Iran</td><td>2</td><td class="v-col">0</td><td>2</td><td class="d-col">0</td><td class="pts-col">2</td></tr>
-        <tr class="bel-row"><td><span class="rank-badge rank-3">3</span>&#127463;&#127466; Belgique</td><td>2</td><td class="v-col">0</td><td>2</td><td class="d-col">0</td><td class="pts-col">2</td></tr>
-        <tr><td><span class="rank-badge rank-4">4</span>&#127475;&#127487; N-Zelande</td><td>2</td><td class="v-col">0</td><td>1</td><td class="d-col">1</td><td class="pts-col">1</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Derniers resultats</div>
-    <div class="match"><span class="match-home">&#127464;&#127476; COL</span><div class="match-score"><span class="score-val">1-0</span></div><span class="match-away">COD &#127464;&#127465;</span><div class="match-time"><div class="match-grp">Grp K 24/06</div><div class="match-hour">04:00</div></div></div>
-    <div class="match"><span class="match-home">&#127477;&#127462; PAN</span><div class="match-score"><span class="score-val">0-1</span></div><span class="match-away">CRO &#127469;&#127479;</span><div class="match-time"><div class="match-grp">Grp L 24/06</div><div class="match-hour">01:00</div></div></div>
-    <div class="match"><span class="match-home">&#127480;&#127468; SCO</span><div class="match-score"><span class="score-val">0-0</span></div><span class="match-away">ENG &#127468;&#127463;</span><div class="match-time"><div class="match-grp">Grp L 23/06</div><div class="match-hour">22:00</div></div></div>
-    <div class="match"><span class="match-home winner">&#127477;&#127481; POR</span><div class="match-score"><span class="score-val">5-0</span></div><span class="match-away loser">UZB &#127482;&#127487;</span><div class="match-time"><div class="match-grp">Grp K 23/06</div><div class="match-hour">19:00</div></div></div>
-    <div class="match"><span class="match-home winner">&#127475;&#127476; NOR</span><div class="match-score"><span class="score-val">3-2</span></div><span class="match-away loser">SEN &#127480;&#127475;</span><div class="match-time"><div class="match-grp">Grp I 23/06</div><div class="match-hour">02:00</div></div></div>
-    <div class="match"><span class="match-home winner">&#127467;&#127479; FRA</span><div class="match-score"><span class="score-val">3-0</span></div><span class="match-away loser">IRQ &#127470;&#127478;</span><div class="match-time"><div class="match-grp">Grp I 22/06</div><div class="match-hour">23:00</div></div></div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Prochains matchs</div>
-    <div class="match"><span class="match-home">&#127464;&#127469; SUI</span><div class="match-score"><span class="score-vs">VS</span></div><span class="match-away">CAN &#127464;&#127462;</span><div class="match-time"><div class="match-grp">Grp B 24/06</div><div class="match-hour">21:00</div></div></div>
-    <div class="match"><span class="match-home">&#127463;&#127462; BIH</span><div class="match-score"><span class="score-vs">VS</span></div><span class="match-away">QAT &#127478;&#127462;</span><div class="match-time"><div class="match-grp">Grp B 24/06</div><div class="match-hour">21:00</div></div></div>
-    <div class="match"><span class="match-home">&#127480;&#127464; SCO</span><div class="match-score"><span class="score-vs">VS</span></div><span class="match-away">BRA &#127463;&#127479;</span><div class="match-time"><div class="match-grp">Grp C 25/06</div><div class="match-hour">00:00</div></div></div>
-    <div class="match"><span class="match-home">&#127474;&#127462; MAR</span><div class="match-score"><span class="score-vs">VS</span></div><span class="match-away">HTI &#127469;&#127481;</span><div class="match-time"><div class="match-grp">Grp C 25/06</div><div class="match-hour">00:00</div></div></div>
-    <div class="match"><span class="match-home">&#127464;&#127487; CZE</span><div class="match-score"><span class="score-vs">VS</span></div><span class="match-away">MEX &#127474;&#127485;</span><div class="match-time"><div class="match-grp">Grp A 25/06</div><div class="match-hour">03:00</div></div></div>
-  </div>
+  <div id="accueil" class="section active"><div class="loading">&#9917; Chargement des donnees...</div></div>
+  <div id="resultats" class="section"><div class="loading">&#9917; Chargement...</div></div>
+  <div id="groupes" class="section"><div class="loading">&#9917; Chargement...</div></div>
+  <div id="avenir" class="section"><div class="loading">&#9917; Chargement...</div></div>
+  <div id="tableau" class="section"></div>
 </div>
-
-<!-- RESULTATS -->
-<div id="resultats" class="section">
-  <div class="date-sep">Lundi 22 Juin</div>
-  <div class="card">
-    <div class="match"><span class="match-home">&#127482;&#127486; URU</span><div class="match-score"><span class="score-val">2-2</span></div><span class="match-away">CPV &#127464;&#127483;</span><div class="match-time"><div class="match-grp">Grp H 22/06</div><div class="match-hour">00:00</div></div></div>
-    <div class="match"><span class="match-home loser">&#127475;&#127487; NZL</span><div class="match-score"><span class="score-val">1-3</span></div><span class="match-away winner">EGY &#127466;&#127468;</span><div class="match-time"><div class="match-grp">Grp G 22/06</div><div class="match-hour">03:00</div></div></div>
-    <div class="match"><span class="match-home winner">&#127462;&#127479; ARG</span><div class="match-score"><span class="score-val">2-0</span></div><span class="match-away loser">AUT &#127462;&#127481;</span><div class="match-time"><div class="match-grp">Grp J 22/06</div><div class="match-hour">19:00</div></div></div>
-    <div class="match"><span class="match-home winner">&#127467;&#127479; FRA</span><div class="match-score"><span class="score-val">3-0</span></div><span class="match-away loser">IRQ &#127470;&#127478;</span><div class="match-time"><div class="match-grp">Grp I 22/06</div><div class="match-hour">23:00</div></div></div>
-  </div>
-  <div class="date-sep">Mardi 23 Juin</div>
-  <div class="card">
-    <div class="match"><span class="match-home winner">&#127475;&#127476; NOR</span><div class="match-score"><span class="score-val">3-2</span></div><span class="match-away loser">SEN &#127480;&#127475;</span><div class="match-time"><div class="match-grp">Grp I 23/06</div><div class="match-hour">02:00</div></div></div>
-    <div class="match"><span class="match-home loser">&#127471;&#127476; JOR</span><div class="match-score"><span class="score-val">1-2</span></div><span class="match-away winner">DZA &#127465;&#127487;</span><div class="match-time"><div class="match-grp">Grp J 23/06</div><div class="match-hour">05:00</div></div></div>
-    <div class="match"><span class="match-home winner">&#127477;&#127481; POR</span><div class="match-score"><span class="score-val">5-0</span></div><span class="match-away loser">UZB &#127482;&#127487;</span><div class="match-time"><div class="match-grp">Grp K 23/06</div><div class="match-hour">19:00</div></div></div>
-    <div class="match"><span class="match-home">&#127468;&#127463; ENG</span><div class="match-score"><span class="score-val">0-0</span></div><span class="match-away">GHA &#127468;&#127469;</span><div class="match-time"><div class="match-grp">Grp L 23/06</div><div class="match-hour">22:00</div></div></div>
-    <div class="match"><span class="match-home loser">&#127477;&#127462; PAN</span><div class="match-score"><span class="score-val">0-1</span></div><span class="match-away winner">CRO &#127469;&#127479;</span><div class="match-time"><div class="match-grp">Grp L 24/06</div><div class="match-hour">01:00</div></div></div>
-  </div>
-  <div class="date-sep">Mercredi 24 Juin</div>
-  <div class="card">
-    <div class="match"><span class="match-home winner">&#127464;&#127476; COL</span><div class="match-score"><span class="score-val">1-0</span></div><span class="match-away loser">COD &#127464;&#127465;</span><div class="match-time"><div class="match-grp">Grp K 24/06</div><div class="match-hour">04:00</div></div></div>
-  </div>
-</div>
-
-<!-- GROUPES -->
-<div id="groupes" class="section">
-  <div class="grp-nav" id="grpNav"></div>
-  <div id="grpContent"></div>
-</div>
-
-<!-- A VENIR -->
-<div id="avenir" class="section">
-  <div class="date-sep">Mercredi 24 Juin</div>
-  <div class="card">
-    <div class="upcoming-match">
-      <div class="upcoming-inner">
-        <div class="upcoming-team"><div class="upcoming-name">&#127464;&#127469; SUI</div><div class="prob-bar"><div class="prob-fill" style="width:39.2%"></div></div><div class="prob-pct">39.2%</div></div>
-        <div class="upcoming-center"><div class="upcoming-grp">Grp B</div><div class="upcoming-hour">21:00</div><div class="upcoming-date">24/06</div></div>
-        <div class="upcoming-team right"><div class="upcoming-name">CAN &#127464;&#127462;</div><div class="prob-bar"><div class="prob-fill right" style="width:29.6%"></div></div><div class="prob-pct right">29.6%</div></div>
-      </div>
-    </div>
-    <div class="upcoming-match">
-      <div class="upcoming-inner">
-        <div class="upcoming-team"><div class="upcoming-name">&#127463;&#127462; BIH</div><div class="prob-bar"><div class="prob-fill" style="width:72.6%"></div></div><div class="prob-pct">72.6%</div></div>
-        <div class="upcoming-center"><div class="upcoming-grp">Grp B</div><div class="upcoming-hour">21:00</div><div class="upcoming-date">24/06</div></div>
-        <div class="upcoming-team right"><div class="upcoming-name">QAT &#127478;&#127462;</div><div class="prob-bar"><div class="prob-fill right" style="width:10.7%"></div></div><div class="prob-pct right">10.7%</div></div>
-      </div>
-    </div>
-  </div>
-  <div class="date-sep">Jeudi 25 Juin</div>
-  <div class="card">
-    <div class="upcoming-match">
-      <div class="upcoming-inner">
-        <div class="upcoming-team"><div class="upcoming-name">&#127480;&#127464; SCO</div><div class="prob-bar"><div class="prob-fill" style="width:9.2%"></div></div><div class="prob-pct">9.2%</div></div>
-        <div class="upcoming-center"><div class="upcoming-grp">Grp C</div><div class="upcoming-hour">00:00</div><div class="upcoming-date">25/06</div></div>
-        <div class="upcoming-team right"><div class="upcoming-name">BRA &#127463;&#127479;</div><div class="prob-bar"><div class="prob-fill right" style="width:74.2%"></div></div><div class="prob-pct right">74.2%</div></div>
-      </div>
-    </div>
-    <div class="upcoming-match">
-      <div class="upcoming-inner">
-        <div class="upcoming-team"><div class="upcoming-name">&#127474;&#127462; MAR</div><div class="prob-bar"><div class="prob-fill" style="width:83%"></div></div><div class="prob-pct">83%</div></div>
-        <div class="upcoming-center"><div class="upcoming-grp">Grp C</div><div class="upcoming-hour">00:00</div><div class="upcoming-date">25/06</div></div>
-        <div class="upcoming-team right"><div class="upcoming-name">HTI &#127469;&#127481;</div><div class="prob-bar"><div class="prob-fill right" style="width:5.2%"></div></div><div class="prob-pct right">5.2%</div></div>
-      </div>
-    </div>
-    <div class="upcoming-match">
-      <div class="upcoming-inner">
-        <div class="upcoming-team"><div class="upcoming-name">&#127464;&#127487; CZE</div><div class="prob-bar"><div class="prob-fill" style="width:25.6%"></div></div><div class="prob-pct">25.6%</div></div>
-        <div class="upcoming-center"><div class="upcoming-grp">Grp A</div><div class="upcoming-hour">03:00</div><div class="upcoming-date">25/06</div></div>
-        <div class="upcoming-team right"><div class="upcoming-name">MEX &#127474;&#127485;</div><div class="prob-bar"><div class="prob-fill right" style="width:49.2%"></div></div><div class="prob-pct right">49.2%</div></div>
-      </div>
-    </div>
-    <div class="upcoming-match">
-      <div class="upcoming-inner">
-        <div class="upcoming-team"><div class="upcoming-name">&#127487;&#127462; RSA</div><div class="prob-bar"><div class="prob-fill" style="width:16%"></div></div><div class="prob-pct">16%</div></div>
-        <div class="upcoming-center"><div class="upcoming-grp">Grp A</div><div class="upcoming-hour">03:00</div><div class="upcoming-date">25/06</div></div>
-        <div class="upcoming-team right"><div class="upcoming-name">KOR &#127472;&#127479;</div><div class="prob-bar"><div class="prob-fill right" style="width:60.6%"></div></div><div class="prob-pct right">60.6%</div></div>
-      </div>
-    </div>
-    <div class="upcoming-match">
-      <div class="upcoming-inner">
-        <div class="upcoming-team"><div class="upcoming-name">&#127466;&#127464; ECU</div><div class="prob-bar"><div class="prob-fill" style="width:24.3%"></div></div><div class="prob-pct">24.3%</div></div>
-        <div class="upcoming-center"><div class="upcoming-grp">Grp E</div><div class="upcoming-hour">22:00</div><div class="upcoming-date">25/06</div></div>
-        <div class="upcoming-team right"><div class="upcoming-name">GER &#127465;&#127466;</div><div class="prob-bar"><div class="prob-fill right" style="width:52.2%"></div></div><div class="prob-pct right">52.2%</div></div>
-      </div>
-    </div>
-    <div class="upcoming-match">
-      <div class="upcoming-inner">
-        <div class="upcoming-team"><div class="upcoming-name">&#127464;&#127484; CUW</div><div class="prob-bar"><div class="prob-fill" style="width:4.8%"></div></div><div class="prob-pct">4.8%</div></div>
-        <div class="upcoming-center"><div class="upcoming-grp">Grp E</div><div class="upcoming-hour">22:00</div><div class="upcoming-date">25/06</div></div>
-        <div class="upcoming-team right"><div class="upcoming-name">CIV &#127464;&#127470;</div><div class="prob-bar"><div class="prob-fill right" style="width:84.7%"></div></div><div class="prob-pct right">84.7%</div></div>
-      </div>
-    </div>
-  </div>
-  <div class="date-sep">Vendredi 26 Juin</div>
-  <div class="card">
-    <div class="upcoming-match">
-      <div class="upcoming-inner">
-        <div class="upcoming-team"><div class="upcoming-name">&#127481;&#127475; TUN</div><div class="prob-bar"><div class="prob-fill" style="width:3.2%"></div></div><div class="prob-pct">3.2%</div></div>
-        <div class="upcoming-center"><div class="upcoming-grp">Grp F</div><div class="upcoming-hour">01:00</div><div class="upcoming-date">26/06</div></div>
-        <div class="upcoming-team right"><div class="upcoming-name">NED &#127475;&#127473;</div><div class="prob-bar"><div class="prob-fill right" style="width:88.1%"></div></div><div class="prob-pct right">88.1%</div></div>
-      </div>
-    </div>
-    <div class="upcoming-match">
-      <div class="upcoming-inner">
-        <div class="upcoming-team"><div class="upcoming-name">&#127471;&#127477; JPN</div><div class="prob-bar"><div class="prob-fill" style="width:50.9%"></div></div><div class="prob-pct">50.9%</div></div>
-        <div class="upcoming-center"><div class="upcoming-grp">Grp F</div><div class="upcoming-hour">01:00</div><div class="upcoming-date">26/06</div></div>
-        <div class="upcoming-team right"><div class="upcoming-name">SWE &#127480;&#127466;</div><div class="prob-bar"><div class="prob-fill right" style="width:22.4%"></div></div><div class="prob-pct right">22.4%</div></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- TABLEAU -->
-<div id="tableau" class="section">
-  <div class="info-box">Phase de groupes en cours &mdash; qualifies connus vers le 2 juillet 2026</div>
-
-  <div class="phase-sep"><div class="phase-line"></div><span class="phase-title">16es DE FINALE</span><div class="phase-line"></div></div>
-  <div class="phase-dates">3 &mdash; 9 juillet 2026</div>
-  <div class="bracket-grid">
-    <div class="tbd"><div class="tbd-head"><span>M49</span><span>3 juil.</span></div><div class="tbd-team">1er Grp A</div><div class="tbd-team">2e Grp B</div></div>
-    <div class="tbd"><div class="tbd-head"><span>M50</span><span>3 juil.</span></div><div class="tbd-team">1er Grp C</div><div class="tbd-team">2e Grp D</div></div>
-    <div class="tbd"><div class="tbd-head"><span>M51</span><span>4 juil.</span></div><div class="tbd-team">1er Grp B</div><div class="tbd-team">2e Grp A</div></div>
-    <div class="tbd"><div class="tbd-head"><span>M52</span><span>4 juil.</span></div><div class="tbd-team">1er Grp D</div><div class="tbd-team">2e Grp C</div></div>
-    <div class="tbd"><div class="tbd-head"><span>M53</span><span>5 juil.</span></div><div class="tbd-team">1er Grp E</div><div class="tbd-team">2e Grp F</div></div>
-    <div class="tbd"><div class="tbd-head"><span>M54</span><span>5 juil.</span></div><div class="tbd-team">1er Grp G</div><div class="tbd-team">2e Grp H</div></div>
-    <div class="tbd"><div class="tbd-head"><span>M55</span><span>6 juil.</span></div><div class="tbd-team">1er Grp F</div><div class="tbd-team">2e Grp E</div></div>
-    <div class="tbd"><div class="tbd-head"><span>M56</span><span>6 juil.</span></div><div class="tbd-team">1er Grp H</div><div class="tbd-team">2e Grp G</div></div>
-    <div class="tbd"><div class="tbd-head"><span>M57</span><span>7 juil.</span></div><div class="tbd-team">1er Grp I</div><div class="tbd-team">2e Grp J</div></div>
-    <div class="tbd"><div class="tbd-head"><span>M58</span><span>7 juil.</span></div><div class="tbd-team">1er Grp K</div><div class="tbd-team">2e Grp L</div></div>
-    <div class="tbd"><div class="tbd-head"><span>M59</span><span>7 juil.</span></div><div class="tbd-team">1er Grp J</div><div class="tbd-team">2e Grp I</div></div>
-    <div class="tbd"><div class="tbd-head"><span>M60</span><span>7 juil.</span></div><div class="tbd-team">1er Grp L</div><div class="tbd-team">2e Grp K</div></div>
-    <div class="tbd"><div class="tbd-head"><span>M61</span><span>8 juil.</span></div><div class="tbd-team">Meilleur 3e</div><div class="tbd-team">Meilleur 3e</div></div>
-    <div class="tbd"><div class="tbd-head"><span>M62</span><span>8 juil.</span></div><div class="tbd-team">Meilleur 3e</div><div class="tbd-team">Meilleur 3e</div></div>
-    <div class="tbd"><div class="tbd-head"><span>M63</span><span>9 juil.</span></div><div class="tbd-team">Meilleur 3e</div><div class="tbd-team">Meilleur 3e</div></div>
-    <div class="tbd"><div class="tbd-head"><span>M64</span><span>9 juil.</span></div><div class="tbd-team">Meilleur 3e</div><div class="tbd-team">Meilleur 3e</div></div>
-  </div>
-
-  <div class="phase-sep"><div class="phase-line"></div><span class="phase-title">8es DE FINALE</span><div class="phase-line"></div></div>
-  <div class="phase-dates">11 &mdash; 14 juillet 2026</div>
-  <div class="bracket-grid">
-    <div class="tbd"><div class="tbd-head"><span>QF1</span><span>11 juil.</span></div><div class="tbd-team">Vainqueur M49</div><div class="tbd-team">Vainqueur M50</div></div>
-    <div class="tbd"><div class="tbd-head"><span>QF2</span><span>11 juil.</span></div><div class="tbd-team">Vainqueur M51</div><div class="tbd-team">Vainqueur M52</div></div>
-    <div class="tbd"><div class="tbd-head"><span>QF3</span><span>12 juil.</span></div><div class="tbd-team">Vainqueur M53</div><div class="tbd-team">Vainqueur M54</div></div>
-    <div class="tbd"><div class="tbd-head"><span>QF4</span><span>12 juil.</span></div><div class="tbd-team">Vainqueur M55</div><div class="tbd-team">Vainqueur M56</div></div>
-    <div class="tbd"><div class="tbd-head"><span>QF5</span><span>13 juil.</span></div><div class="tbd-team">Vainqueur M57</div><div class="tbd-team">Vainqueur M58</div></div>
-    <div class="tbd"><div class="tbd-head"><span>QF6</span><span>13 juil.</span></div><div class="tbd-team">Vainqueur M59</div><div class="tbd-team">Vainqueur M60</div></div>
-    <div class="tbd"><div class="tbd-head"><span>QF7</span><span>14 juil.</span></div><div class="tbd-team">Vainqueur M61</div><div class="tbd-team">Vainqueur M62</div></div>
-    <div class="tbd"><div class="tbd-head"><span>QF8</span><span>14 juil.</span></div><div class="tbd-team">Vainqueur M63</div><div class="tbd-team">Vainqueur M64</div></div>
-  </div>
-
-  <div class="phase-sep"><div class="phase-line"></div><span class="phase-title">QUARTS DE FINALE</span><div class="phase-line"></div></div>
-  <div class="phase-dates">17 &mdash; 19 juillet 2026</div>
-  <div class="bracket-grid">
-    <div class="tbd"><div class="tbd-head"><span>1/4 A</span><span>17 juil.</span></div><div class="tbd-team">Vainqueur QF1</div><div class="tbd-team">Vainqueur QF2</div></div>
-    <div class="tbd"><div class="tbd-head"><span>1/4 B</span><span>18 juil.</span></div><div class="tbd-team">Vainqueur QF3</div><div class="tbd-team">Vainqueur QF4</div></div>
-    <div class="tbd"><div class="tbd-head"><span>1/4 C</span><span>18 juil.</span></div><div class="tbd-team">Vainqueur QF5</div><div class="tbd-team">Vainqueur QF6</div></div>
-    <div class="tbd"><div class="tbd-head"><span>1/4 D</span><span>19 juil.</span></div><div class="tbd-team">Vainqueur QF7</div><div class="tbd-team">Vainqueur QF8</div></div>
-  </div>
-
-  <div class="phase-sep"><div class="phase-line"></div><span class="phase-title">DEMI-FINALES</span><div class="phase-line"></div></div>
-  <div class="phase-dates">22 &mdash; 23 juillet 2026</div>
-  <div class="bracket-grid">
-    <div class="tbd"><div class="tbd-head"><span>1/2 A</span><span>22 juil.</span></div><div class="tbd-team">Vainqueur 1/4 A</div><div class="tbd-team">Vainqueur 1/4 B</div></div>
-    <div class="tbd"><div class="tbd-head"><span>1/2 B</span><span>23 juil.</span></div><div class="tbd-team">Vainqueur 1/4 C</div><div class="tbd-team">Vainqueur 1/4 D</div></div>
-  </div>
-
-  <div class="phase-sep"><div class="phase-line"></div><span class="phase-title">PETITE FINALE</span><div class="phase-line"></div></div>
-  <div class="phase-dates">25 juillet 2026 &mdash; Miami</div>
-  <div class="finale-wrap">
-    <div class="tbd"><div class="tbd-head"><span>3e place</span><span>25 juil.</span></div><div class="tbd-team">Perdant 1/2 A</div><div class="tbd-team">Perdant 1/2 B</div></div>
-  </div>
-
-  <div class="finale-sep"><div class="finale-line"></div><span class="finale-label">FINALE</span><div class="finale-line"></div></div>
-  <div class="finale-info">19 JUILLET 2026 &middot; METLIFE STADIUM NEW YORK &middot; 19h CEST</div>
-  <div class="finale-wrap">
-    <div class="finale-card">
-      <div class="finale-head"><span>FINALE MONDIALE</span><span>19 juil. 19h</span></div>
-      <div class="finale-team">Vainqueur 1/2 A</div>
-      <div class="finale-team">Vainqueur 1/2 B</div>
-    </div>
-  </div>
-  <div class="trophy">&#127942;</div>
-</div>
-
-</div><!-- /main -->
 
 <script>
-var STANDINGS = [
-  {g:"A",r:1,a:"MEX",n:"Mexique",    f:"&#127474;&#127485;",j:2,v:2,nul:0,d:0,pts:6},
-  {g:"A",r:2,a:"KOR",n:"Coree S.",   f:"&#127472;&#127479;",j:2,v:1,nul:0,d:1,pts:3},
-  {g:"A",r:3,a:"CZE",n:"Tcheque",    f:"&#127464;&#127487;",j:2,v:0,nul:1,d:1,pts:1},
-  {g:"A",r:4,a:"RSA",n:"Afr. Sud",   f:"&#127487;&#127462;",j:2,v:0,nul:1,d:1,pts:1},
-  {g:"B",r:1,a:"CAN",n:"Canada",     f:"&#127464;&#127462;",j:2,v:1,nul:1,d:0,pts:4},
-  {g:"B",r:2,a:"SUI",n:"Suisse",     f:"&#127464;&#127469;",j:2,v:1,nul:1,d:0,pts:4},
-  {g:"B",r:3,a:"BIH",n:"Bosnie",     f:"&#127463;&#127462;",j:2,v:0,nul:1,d:1,pts:1},
-  {g:"B",r:4,a:"QAT",n:"Qatar",      f:"&#127478;&#127462;",j:2,v:0,nul:1,d:1,pts:1},
-  {g:"C",r:1,a:"BRA",n:"Bresil",     f:"&#127463;&#127479;",j:2,v:1,nul:1,d:0,pts:4},
-  {g:"C",r:2,a:"MAR",n:"Maroc",      f:"&#127474;&#127462;",j:2,v:1,nul:1,d:0,pts:4},
-  {g:"C",r:3,a:"SCO",n:"Ecosse",     f:"&#127480;&#127464;",j:2,v:1,nul:0,d:1,pts:3},
-  {g:"C",r:4,a:"HTI",n:"Haiti",      f:"&#127469;&#127481;",j:2,v:0,nul:0,d:2,pts:0},
-  {g:"D",r:1,a:"USA",n:"Etats-Unis", f:"&#127482;&#127480;",j:2,v:2,nul:0,d:0,pts:6},
-  {g:"D",r:2,a:"AUS",n:"Australie",  f:"&#127462;&#127482;",j:2,v:1,nul:0,d:1,pts:3},
-  {g:"D",r:3,a:"PAR",n:"Paraguay",   f:"&#127477;&#127486;",j:2,v:1,nul:0,d:1,pts:3},
-  {g:"D",r:4,a:"TUR",n:"Turquie",    f:"&#127481;&#127479;",j:2,v:0,nul:0,d:2,pts:0},
-  {g:"E",r:1,a:"GER",n:"Allemagne",  f:"&#127465;&#127466;",j:2,v:2,nul:0,d:0,pts:6},
-  {g:"E",r:2,a:"CIV",n:"Cote Ivoire",f:"&#127464;&#127470;",j:2,v:1,nul:0,d:1,pts:3},
-  {g:"E",r:3,a:"ECU",n:"Equateur",   f:"&#127466;&#127464;",j:2,v:0,nul:1,d:1,pts:1},
-  {g:"E",r:4,a:"CUW",n:"Curacao",    f:"&#127464;&#127484;",j:2,v:0,nul:1,d:1,pts:1},
-  {g:"F",r:1,a:"NED",n:"Pays-Bas",   f:"&#127475;&#127473;",j:2,v:1,nul:1,d:0,pts:4},
-  {g:"F",r:2,a:"JPN",n:"Japon",      f:"&#127471;&#127477;",j:2,v:1,nul:1,d:0,pts:4},
-  {g:"F",r:3,a:"SWE",n:"Suede",      f:"&#127480;&#127466;",j:2,v:1,nul:0,d:1,pts:3},
-  {g:"F",r:4,a:"TUN",n:"Tunisie",    f:"&#127481;&#127475;",j:2,v:0,nul:0,d:2,pts:0},
-  {g:"G",r:1,a:"EGY",n:"Egypte",     f:"&#127466;&#127468;",j:2,v:1,nul:1,d:0,pts:4},
-  {g:"G",r:2,a:"IRN",n:"Iran",       f:"&#127470;&#127479;",j:2,v:0,nul:2,d:0,pts:2},
-  {g:"G",r:3,a:"BEL",n:"Belgique",   f:"&#127463;&#127466;",j:2,v:0,nul:2,d:0,pts:2},
-  {g:"G",r:4,a:"NZL",n:"N-Zelande",  f:"&#127475;&#127487;",j:2,v:0,nul:1,d:1,pts:1},
-  {g:"H",r:1,a:"ESP",n:"Espagne",    f:"&#127466;&#127480;",j:2,v:1,nul:1,d:0,pts:4},
-  {g:"H",r:2,a:"URU",n:"Uruguay",    f:"&#127482;&#127486;",j:2,v:0,nul:2,d:0,pts:2},
-  {g:"H",r:3,a:"CPV",n:"Cap-Vert",   f:"&#127464;&#127483;",j:2,v:0,nul:2,d:0,pts:2},
-  {g:"H",r:4,a:"KSA",n:"Arabie Sao.",f:"&#127480;&#127462;",j:2,v:0,nul:1,d:1,pts:1},
-  {g:"I",r:1,a:"FRA",n:"France",     f:"&#127467;&#127479;",j:2,v:2,nul:0,d:0,pts:6},
-  {g:"I",r:2,a:"NOR",n:"Norvege",    f:"&#127475;&#127476;",j:2,v:2,nul:0,d:0,pts:6},
-  {g:"I",r:3,a:"SEN",n:"Senegal",    f:"&#127480;&#127475;",j:2,v:0,nul:0,d:2,pts:0},
-  {g:"I",r:4,a:"IRQ",n:"Iraq",       f:"&#127470;&#127478;",j:2,v:0,nul:0,d:2,pts:0},
-  {g:"J",r:1,a:"ARG",n:"Argentine",  f:"&#127462;&#127479;",j:2,v:2,nul:0,d:0,pts:6},
-  {g:"J",r:2,a:"AUT",n:"Autriche",   f:"&#127462;&#127481;",j:2,v:1,nul:0,d:1,pts:3},
-  {g:"J",r:3,a:"DZA",n:"Algerie",    f:"&#127465;&#127487;",j:2,v:1,nul:0,d:1,pts:3},
-  {g:"J",r:4,a:"JOR",n:"Jordanie",   f:"&#127471;&#127476;",j:2,v:0,nul:0,d:2,pts:0},
-  {g:"K",r:1,a:"COL",n:"Colombie",   f:"&#127464;&#127476;",j:2,v:2,nul:0,d:0,pts:6},
-  {g:"K",r:2,a:"POR",n:"Portugal",   f:"&#127477;&#127481;",j:2,v:1,nul:1,d:0,pts:4},
-  {g:"K",r:3,a:"COD",n:"Congo RD",   f:"&#127464;&#127465;",j:2,v:0,nul:1,d:1,pts:1},
-  {g:"K",r:4,a:"UZB",n:"Ouzbekistan",f:"&#127482;&#127487;",j:2,v:0,nul:0,d:2,pts:0},
-  {g:"L",r:1,a:"ENG",n:"Angleterre", f:"&#127968;",j:2,v:1,nul:1,d:0,pts:4},
-  {g:"L",r:2,a:"GHA",n:"Ghana",      f:"&#127468;&#127469;",j:2,v:1,nul:1,d:0,pts:4},
-  {g:"L",r:3,a:"CRO",n:"Croatie",    f:"&#127469;&#127479;",j:2,v:1,nul:0,d:1,pts:3},
-  {g:"L",r:4,a:"PAN",n:"Panama",     f:"&#127477;&#127462;",j:2,v:0,nul:0,d:2,pts:0},
-];
+var FLAGS = {
+  "Mexico":"&#127474;&#127485;","South Africa":"&#127487;&#127462;","South Korea":"&#127472;&#127479;","Czech Republic":"&#127464;&#127487;",
+  "Canada":"&#127464;&#127462;","Switzerland":"&#127464;&#127469;","Bosnia-Herzegovina":"&#127463;&#127462;","Qatar":"&#127478;&#127462;",
+  "Brazil":"&#127463;&#127479;","Morocco":"&#127474;&#127462;","Scotland":"&#127480;&#127464;","Haiti":"&#127469;&#127481;",
+  "United States":"&#127482;&#127480;","Australia":"&#127462;&#127482;","Paraguay":"&#127477;&#127486;","Turkey":"&#127481;&#127479;",
+  "Germany":"&#127465;&#127466;","Ivory Coast":"&#127464;&#127470;","Ecuador":"&#127466;&#127464;","Curacao":"&#127464;&#127484;",
+  "Netherlands":"&#127475;&#127473;","Japan":"&#127471;&#127477;","Sweden":"&#127480;&#127466;","Tunisia":"&#127481;&#127475;",
+  "Egypt":"&#127466;&#127468;","Iran":"&#127470;&#127479;","Belgium":"&#127463;&#127466;","New Zealand":"&#127475;&#127487;",
+  "Spain":"&#127466;&#127480;","Uruguay":"&#127482;&#127486;","Cape Verde":"&#127464;&#127483;","Saudi Arabia":"&#127480;&#127462;",
+  "France":"&#127467;&#127479;","Norway":"&#127475;&#127476;","Senegal":"&#127480;&#127475;","Iraq":"&#127470;&#127478;",
+  "Argentina":"&#127462;&#127479;","Austria":"&#127462;&#127481;","Algeria":"&#127465;&#127487;","Jordan":"&#127471;&#127476;",
+  "Colombia":"&#127464;&#127476;","Portugal":"&#127477;&#127481;","DR Congo":"&#127464;&#127465;","Uzbekistan":"&#127482;&#127487;",
+  "England":"&#127968;","Ghana":"&#127468;&#127469;","Croatia":"&#127469;&#127479;","Panama":"&#127477;&#127462;"
+};
+
+var NAMES_FR = {
+  "Mexico":"Mexique","South Africa":"Afr. du Sud","South Korea":"Coree du S.","Czech Republic":"Tcheque",
+  "Canada":"Canada","Switzerland":"Suisse","Bosnia-Herzegovina":"Bosnie","Qatar":"Qatar",
+  "Brazil":"Bresil","Morocco":"Maroc","Scotland":"Ecosse","Haiti":"Haiti",
+  "United States":"Etats-Unis","Australia":"Australie","Paraguay":"Paraguay","Turkey":"Turquie",
+  "Germany":"Allemagne","Ivory Coast":"Cote Ivoire","Ecuador":"Equateur","Curacao":"Curacao",
+  "Netherlands":"Pays-Bas","Japan":"Japon","Sweden":"Suede","Tunisia":"Tunisie",
+  "Egypt":"Egypte","Iran":"Iran","Belgium":"Belgique","New Zealand":"N-Zelande",
+  "Spain":"Espagne","Uruguay":"Uruguay","Cape Verde":"Cap-Vert","Saudi Arabia":"Arabie Saoudite",
+  "France":"France","Norway":"Norvege","Senegal":"Senegal","Iraq":"Iraq",
+  "Argentina":"Argentine","Austria":"Autriche","Algeria":"Algerie","Jordan":"Jordanie",
+  "Colombia":"Colombie","Portugal":"Portugal","DR Congo":"Congo RD","Uzbekistan":"Ouzbekistan",
+  "England":"Angleterre","Ghana":"Ghana","Croatia":"Croatie","Panama":"Panama"
+};
+
+var allMatches = [];
+var allStandings = {};
+var activeGrp = 'ALL';
+var currentTab = 'accueil';
+
+function fr(n){ return NAMES_FR[n]||n; }
+function flag(n){ return FLAGS[n]||'&#127988;'; }
+
+function fmtDate(d){
+  var dt = new Date(d);
+  return dt.toLocaleDateString('fr-BE',{day:'2-digit',month:'2-digit',timeZone:'UTC'});
+}
+function fmtDateLong(d){
+  var dt = new Date(d);
+  return dt.toLocaleDateString('fr-BE',{weekday:'long',day:'numeric',month:'long',timeZone:'UTC'});
+}
+function fmtHour(d,t){
+  if(!t) return '';
+  return t.replace(' UTC','').replace(' UTC+2','');
+}
 
 function showTab(id, btn) {
   document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
   document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
   document.getElementById(id).classList.add('active');
   if(btn) btn.classList.add('active');
-  if(id==='groupes') buildGroupes('ALL');
+  currentTab = id;
+  renderTab(id);
 }
 
-var activeGrp = 'ALL';
+function loadData() {
+  var btn = document.getElementById('btnRefresh');
+  var icon = document.getElementById('refreshIcon');
+  var info = document.getElementById('updateInfo');
+  btn.disabled = true;
+  icon.className = 'spin';
+  icon.innerHTML = '&#8635;';
+  info.textContent = 'Mise a jour...';
 
-function buildGroupes(filter) {
-  activeGrp = filter;
-  var groups = [];
-  STANDINGS.forEach(function(t){ if(groups.indexOf(t.g)<0) groups.push(t.g); });
-  
-  var nav = document.getElementById('grpNav');
-  if(!nav.innerHTML) {
-    var btns = '<button class="grp-btn active" onclick="buildGroupes(\'ALL\');filterGrpBtn(this)">Tous</button>';
-    groups.forEach(function(g){ btns += '<button class="grp-btn" onclick="buildGroupes(\''+g+'\');filterGrpBtn(this)">Grp '+g+'</button>'; });
-    nav.innerHTML = btns;
+  // Use a CORS proxy to fetch the openfootball API
+  var url = 'https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json';
+  var proxy = 'https://corsproxy.io/?' + encodeURIComponent(url);
+
+  fetch(proxy)
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      processData(data);
+      var now = new Date();
+      info.textContent = 'Mis a jour ' + now.toLocaleTimeString('fr-BE',{hour:'2-digit',minute:'2-digit'});
+      btn.disabled = false;
+      icon.className = '';
+      icon.innerHTML = '&#8635;';
+      renderTab(currentTab);
+    })
+    .catch(function(e){
+      info.textContent = 'Erreur - donnees integrees utilisees';
+      btn.disabled = false;
+      icon.className = '';
+      icon.innerHTML = '&#8635;';
+      loadFallback();
+    });
+}
+
+function processData(data) {
+  allMatches = [];
+  allStandings = {};
+
+  if(!data || !data.matches) return;
+
+  // Group standings computation
+  var groups = {};
+  data.matches.forEach(function(m){
+    if(!m.group) return;
+    var g = m.group.replace('Group ','');
+    if(!groups[g]) groups[g] = {};
+    [m.team1, m.team2].forEach(function(t){
+      if(!groups[g][t]) groups[g][t] = {n:t,j:0,v:0,nul:0,d:0,pts:0};
+    });
+    if(m.score && m.score.ft) {
+      var s1 = m.score.ft[0], s2 = m.score.ft[1];
+      groups[g][m.team1].j++;
+      groups[g][m.team2].j++;
+      if(s1>s2){ groups[g][m.team1].v++; groups[g][m.team1].pts+=3; groups[g][m.team2].d++; }
+      else if(s2>s1){ groups[g][m.team2].v++; groups[g][m.team2].pts+=3; groups[g][m.team1].d++; }
+      else { groups[g][m.team1].nul++; groups[g][m.team1].pts++; groups[g][m.team2].nul++; groups[g][m.team2].pts++; }
+    }
+    // Build match
+    var isFinished = !!(m.score && m.score.ft);
+    allMatches.push({
+      date: m.date,
+      time: m.time||'',
+      home: m.team1,
+      away: m.team2,
+      group: g,
+      status: isFinished ? 'final' : 'scheduled',
+      scoreH: isFinished ? m.score.ft[0] : null,
+      scoreA: isFinished ? m.score.ft[1] : null,
+    });
+  });
+
+  // Sort standings
+  Object.keys(groups).forEach(function(g){
+    var teams = Object.values(groups[g]);
+    teams.sort(function(a,b){ return b.pts-a.pts; });
+    allStandings[g] = teams.map(function(t,i){ return Object.assign({r:i+1},t); });
+  });
+}
+
+function loadFallback() {
+  // Donnees integrees du 24/06/2026
+  allMatches = [
+    {date:'2026-06-11',time:'21:00',home:'Mexico',away:'South Africa',group:'A',status:'final',scoreH:2,scoreA:0},
+    {date:'2026-06-11',time:'02:00',home:'South Korea',away:'Czech Republic',group:'A',status:'final',scoreH:2,scoreA:1},
+    {date:'2026-06-15',time:'02:00',home:'Czech Republic',away:'South Africa',group:'A',status:'final',scoreH:1,scoreA:1},
+    {date:'2026-06-15',time:'21:00',home:'Mexico',away:'South Korea',group:'A',status:'final',scoreH:2,scoreA:1},
+    {date:'2026-06-19',time:'01:00',home:'South Africa',away:'South Korea',group:'A',status:'scheduled',scoreH:null,scoreA:null},
+    {date:'2026-06-19',time:'01:00',home:'Czech Republic',away:'Mexico',group:'A',status:'scheduled',scoreH:null,scoreA:null},
+    {date:'2026-06-21',time:'22:00',home:'Uruguay',away:'Cape Verde',group:'H',status:'final',scoreH:2,scoreA:2},
+    {date:'2026-06-22',time:'01:00',home:'New Zealand',away:'Egypt',group:'G',status:'final',scoreH:1,scoreA:3},
+    {date:'2026-06-22',time:'17:00',home:'Argentina',away:'Austria',group:'J',status:'final',scoreH:2,scoreA:0},
+    {date:'2026-06-22',time:'21:00',home:'France',away:'Iraq',group:'I',status:'final',scoreH:3,scoreA:0},
+    {date:'2026-06-23',time:'00:00',home:'Norway',away:'Senegal',group:'I',status:'final',scoreH:3,scoreA:2},
+    {date:'2026-06-23',time:'03:00',home:'Jordan',away:'Algeria',group:'J',status:'final',scoreH:1,scoreA:2},
+    {date:'2026-06-23',time:'17:00',home:'Portugal',away:'Uzbekistan',group:'K',status:'final',scoreH:5,scoreA:0},
+    {date:'2026-06-23',time:'20:00',home:'England',away:'Ghana',group:'L',status:'final',scoreH:0,scoreA:0},
+    {date:'2026-06-23',time:'23:00',home:'Panama',away:'Croatia',group:'L',status:'final',scoreH:0,scoreA:1},
+    {date:'2026-06-24',time:'02:00',home:'Colombia',away:'DR Congo',group:'K',status:'final',scoreH:1,scoreA:0},
+    {date:'2026-06-24',time:'19:00',home:'Switzerland',away:'Canada',group:'B',status:'scheduled',scoreH:null,scoreA:null},
+    {date:'2026-06-24',time:'19:00',home:'Bosnia-Herzegovina',away:'Qatar',group:'B',status:'scheduled',scoreH:null,scoreA:null},
+    {date:'2026-06-24',time:'22:00',home:'Scotland',away:'Brazil',group:'C',status:'scheduled',scoreH:null,scoreA:null},
+    {date:'2026-06-24',time:'22:00',home:'Morocco',away:'Haiti',group:'C',status:'scheduled',scoreH:null,scoreA:null},
+    {date:'2026-06-25',time:'01:00',home:'Czech Republic',away:'Mexico',group:'A',status:'scheduled',scoreH:null,scoreA:null},
+    {date:'2026-06-25',time:'01:00',home:'South Africa',away:'South Korea',group:'A',status:'scheduled',scoreH:null,scoreA:null},
+    {date:'2026-06-25',time:'20:00',home:'Ecuador',away:'Germany',group:'E',status:'scheduled',scoreH:null,scoreA:null},
+    {date:'2026-06-25',time:'20:00',home:'Curacao',away:'Ivory Coast',group:'E',status:'scheduled',scoreH:null,scoreA:null},
+    {date:'2026-06-25',time:'23:00',home:'Tunisia',away:'Netherlands',group:'F',status:'scheduled',scoreH:null,scoreA:null},
+    {date:'2026-06-25',time:'23:00',home:'Japan',away:'Sweden',group:'F',status:'scheduled',scoreH:null,scoreA:null},
+  ];
+
+  // Calcul classements depuis les matchs
+  var groups = {};
+  allMatches.forEach(function(m){
+    var g = m.group;
+    if(!groups[g]) groups[g]={};
+    [m.home,m.away].forEach(function(t){
+      if(!groups[g][t]) groups[g][t]={n:t,j:0,v:0,nul:0,d:0,pts:0};
+    });
+    if(m.status==='final'){
+      groups[g][m.home].j++; groups[g][m.away].j++;
+      if(m.scoreH>m.scoreA){groups[g][m.home].v++;groups[g][m.home].pts+=3;groups[g][m.away].d++;}
+      else if(m.scoreA>m.scoreH){groups[g][m.away].v++;groups[g][m.away].pts+=3;groups[g][m.home].d++;}
+      else{groups[g][m.home].nul++;groups[g][m.home].pts++;groups[g][m.away].nul++;groups[g][m.away].pts++;}
+    }
+  });
+  Object.keys(groups).forEach(function(g){
+    var t=Object.values(groups[g]);
+    t.sort(function(a,b){return b.pts-a.pts;});
+    allStandings[g]=t.map(function(t,i){return Object.assign({r:i+1},t);});
+  });
+
+  document.getElementById('updateInfo').textContent = 'Donnees integrees 24/06/2026';
+  renderTab(currentTab);
+}
+
+function matchRow(m) {
+  var done = m.status==='final';
+  var isBel = m.home==='Belgium'||m.away==='Belgium';
+  var hW = done && m.scoreH>m.scoreA;
+  var aW = done && m.scoreA>m.scoreH;
+  var cls = isBel ? ' class="match bel-m"' : ' class="match"';
+  var hc = hW?'mh w':aW?'mh l':'mh';
+  var ac = aW?'ma w':hW?'ma l':'ma';
+  var sc = done ? '<span class="sv">'+m.scoreH+' - '+m.scoreA+'</span>' : '<span class="vs">VS</span>';
+  var hr = m.time ? m.time.split(' ')[0] : '';
+  return '<div'+cls+'>'
+    +'<span class="'+hc+'">'+flag(m.home)+' '+fr(m.home)+'</span>'
+    +'<div class="ms">'+sc+'</div>'
+    +'<span class="'+ac+'">'+fr(m.away)+' '+flag(m.away)+'</span>'
+    +'<div class="mt"><div class="mg">Grp '+m.group+' '+fmtDate(m.date)+'</div><div class="mhr">'+hr+'</div></div>'
+    +'</div>';
+}
+
+function standingsTable(teams) {
+  var h = '<table class="standings"><thead><tr><th style="text-align:left">Equipe</th><th>J</th><th class="vc">V</th><th>N</th><th class="dc">D</th><th class="pc">Pts</th></tr></thead><tbody>';
+  teams.forEach(function(t){
+    var bel = t.n==='Belgium'?'br':'';
+    var bc = 'r'+t.r;
+    h += '<tr class="'+bel+'"><td><span class="rb '+bc+'">'+t.r+'</span>'+flag(t.n)+' '+fr(t.n)+'</td>';
+    h += '<td>'+t.j+'</td><td class="vc">'+t.v+'</td><td>'+t.nul+'</td><td class="dc">'+t.d+'</td><td class="pc">'+t.pts+'</td></tr>';
+  });
+  return h+'</tbody></table>';
+}
+
+function renderTab(id) {
+  if(id==='accueil') renderAccueil();
+  else if(id==='resultats') renderResultats();
+  else if(id==='groupes') renderGroupes(activeGrp);
+  else if(id==='avenir') renderAvenir();
+  else if(id==='tableau') renderTableau();
+}
+
+function renderAccueil() {
+  var finished = allMatches.filter(function(m){return m.status==='final';});
+  var upcoming = allMatches.filter(function(m){return m.status==='scheduled';}).slice(0,5);
+  var belG = allStandings['G']||[];
+  var totalFinished = finished.length;
+  var recent = finished.slice(-6).reverse();
+
+  var html = '<div class="stats">';
+  html += '<div class="stat"><div class="stat-n">'+totalFinished+'</div><div class="stat-l">Joues</div></div>';
+  html += '<div class="stat"><div class="stat-n">12</div><div class="stat-l">Groupes</div></div>';
+  html += '<div class="stat"><div class="stat-n">48</div><div class="stat-l">Nations</div></div>';
+  html += '<div class="stat"><div class="stat-n" style="font-family:Inter,sans-serif;font-size:1.6rem">&#127463;&#127466;</div><div class="stat-l">Grp G</div></div>';
+  html += '</div>';
+
+  if(belG.length) {
+    html += '<div class="card bel"><div class="card-title bel">&#127463;&#127466; Belgique &mdash; Groupe G</div>'+standingsTable(belG)+'</div>';
   }
 
-  var shown = filter==='ALL' ? groups : [filter];
-  var html = '';
-  shown.forEach(function(g){
-    var teams = STANDINGS.filter(function(t){return t.g===g;});
-    html += '<div class="card"><div class="card-title">Groupe '+g+'</div>';
-    html += '<table class="standings"><thead><tr><th style="text-align:left">Equipe</th><th>J</th><th class="v-col">V</th><th>N</th><th class="d-col">D</th><th class="pts-col">Pts</th></tr></thead><tbody>';
-    teams.forEach(function(t){
-      var bel = t.a==='BEL' ? ' class="bel-row"' : '';
-      var bc = t.r===1?'rank-1':t.r===2?'rank-2':t.r===3?'rank-3':'rank-4';
-      html += '<tr'+bel+'><td><span class="rank-badge '+bc+'">'+t.r+'</span>'+t.f+' '+t.n+'</td>';
-      html += '<td>'+t.j+'</td><td class="v-col">'+t.v+'</td><td>'+t.nul+'</td><td class="d-col">'+t.d+'</td><td class="pts-col">'+t.pts+'</td></tr>';
-    });
-    html += '</tbody></table></div>';
-  });
-  document.getElementById('grpContent').innerHTML = html;
+  html += '<div class="card"><div class="card-title">Derniers resultats</div>';
+  recent.forEach(function(m){ html += matchRow(m); });
+  html += '</div>';
+
+  html += '<div class="card"><div class="card-title">Prochains matchs</div>';
+  if(upcoming.length) upcoming.forEach(function(m){ html += matchRow(m); });
+  else html += '<div style="padding:14px;color:var(--grey);text-align:center">Aucun match programme</div>';
+  html += '</div>';
+
+  document.getElementById('accueil').innerHTML = html;
 }
 
-function filterGrpBtn(btn) {
+function renderResultats() {
+  var finished = allMatches.filter(function(m){return m.status==='final';}).reverse();
+  var byDate = {};
+  finished.forEach(function(m){
+    var d = fmtDateLong(m.date);
+    if(!byDate[d]) byDate[d]=[];
+    byDate[d].push(m);
+  });
+  var html = '';
+  Object.entries(byDate).forEach(function(e){
+    html += '<div class="dsep">'+e[0]+'</div><div class="card">';
+    e[1].forEach(function(m){ html += matchRow(m); });
+    html += '</div>';
+  });
+  if(!html) html = '<div style="padding:30px;text-align:center;color:var(--grey)">Aucun resultat</div>';
+  document.getElementById('resultats').innerHTML = html;
+}
+
+function renderGroupes(filter) {
+  activeGrp = filter;
+  var groups = Object.keys(allStandings).sort();
+  var shown = filter==='ALL' ? groups : [filter];
+
+  var nav = '<div class="grp-nav">';
+  nav += '<button class="grp-btn'+(filter==='ALL'?' active':'')+'" onclick="renderGroupes(\'ALL\');updateGrpBtns(this)">Tous</button>';
+  groups.forEach(function(g){
+    nav += '<button class="grp-btn'+(filter===g?' active':'')+'" onclick="renderGroupes(\''+g+'\');updateGrpBtns(this)">Grp '+g+'</button>';
+  });
+  nav += '</div>';
+
+  var html = nav;
+  shown.forEach(function(g){
+    var teams = allStandings[g]||[];
+    html += '<div class="card"><div class="card-title">Groupe '+g+'</div>'+standingsTable(teams)+'</div>';
+  });
+  document.getElementById('groupes').innerHTML = html;
+}
+
+function updateGrpBtns(btn) {
   document.querySelectorAll('.grp-btn').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
 }
+
+function renderAvenir() {
+  var upcoming = allMatches.filter(function(m){return m.status==='scheduled';});
+  var byDate = {};
+  upcoming.forEach(function(m){
+    var d = fmtDateLong(m.date);
+    if(!byDate[d]) byDate[d]=[];
+    byDate[d].push(m);
+  });
+  var html = '';
+  Object.entries(byDate).forEach(function(e){
+    html += '<div class="dsep">'+e[0]+'</div><div class="card">';
+    e[1].forEach(function(m){
+      var hr = m.time ? m.time.split(' ')[0] : '';
+      html += '<div class="upm"><div class="upi">';
+      html += '<div class="upt"><div class="un">'+flag(m.home)+' '+fr(m.home)+'</div></div>';
+      html += '<div class="upc"><div class="ucg">Grp '+m.group+'</div><div class="uch">'+hr+'</div><div class="ucd">'+fmtDate(m.date)+'</div></div>';
+      html += '<div class="upt r"><div class="un">'+fr(m.away)+' '+flag(m.away)+'</div></div>';
+      html += '</div></div>';
+    });
+    html += '</div>';
+  });
+  if(!html) html = '<div style="padding:30px;text-align:center;color:var(--grey)">Aucun match programme</div>';
+  document.getElementById('avenir').innerHTML = html;
+}
+
+function renderTableau() {
+  function sep(t,d){ return '<div class="psep"><div class="pl"></div><span class="pt">'+t+'</span><div class="pl"></div></div><div class="pd">'+d+'</div>'; }
+  function tbd(id,d,a,b){ return '<div class="tbd"><div class="tbdh"><span>'+id+'</span><span>'+d+'</span></div><div class="tbdt">'+a+'</div><div class="tbdt">'+b+'</div></div>'; }
+
+  var html = '<div class="info-box">Phase de groupes en cours &mdash; qualifies connus vers le 2 juillet 2026</div>';
+
+  html += sep('16es DE FINALE','3 &mdash; 9 juillet 2026')+'<div class="bg">';
+  var s16 = [
+    ['M49','3 juil.','1er Grp A','2e Grp B'],['M50','3 juil.','1er Grp C','2e Grp D'],
+    ['M51','4 juil.','1er Grp B','2e Grp A'],['M52','4 juil.','1er Grp D','2e Grp C'],
+    ['M53','5 juil.','1er Grp E','2e Grp F'],['M54','5 juil.','1er Grp G','2e Grp H'],
+    ['M55','6 juil.','1er Grp F','2e Grp E'],['M56','6 juil.','1er Grp H','2e Grp G'],
+    ['M57','7 juil.','1er Grp I','2e Grp J'],['M58','7 juil.','1er Grp K','2e Grp L'],
+    ['M59','7 juil.','1er Grp J','2e Grp I'],['M60','7 juil.','1er Grp L','2e Grp K'],
+    ['M61','8 juil.','Meilleur 3e','Meilleur 3e'],['M62','8 juil.','Meilleur 3e','Meilleur 3e'],
+    ['M63','9 juil.','Meilleur 3e','Meilleur 3e'],['M64','9 juil.','Meilleur 3e','Meilleur 3e'],
+  ];
+  s16.forEach(function(m){ html += tbd(m[0],m[1],m[2],m[3]); });
+  html += '</div>';
+
+  html += sep('8es DE FINALE','11 &mdash; 14 juillet 2026')+'<div class="bg">';
+  [['QF1','11 juil.','Vainqueur M49','Vainqueur M50'],['QF2','11 juil.','Vainqueur M51','Vainqueur M52'],
+   ['QF3','12 juil.','Vainqueur M53','Vainqueur M54'],['QF4','12 juil.','Vainqueur M55','Vainqueur M56'],
+   ['QF5','13 juil.','Vainqueur M57','Vainqueur M58'],['QF6','13 juil.','Vainqueur M59','Vainqueur M60'],
+   ['QF7','14 juil.','Vainqueur M61','Vainqueur M62'],['QF8','14 juil.','Vainqueur M63','Vainqueur M64']
+  ].forEach(function(m){ html += tbd(m[0],m[1],m[2],m[3]); });
+  html += '</div>';
+
+  html += sep('QUARTS DE FINALE','17 &mdash; 19 juillet 2026')+'<div class="bg">';
+  [['1/4 A','17 juil.','Vainqueur QF1','Vainqueur QF2'],['1/4 B','18 juil.','Vainqueur QF3','Vainqueur QF4'],
+   ['1/4 C','18 juil.','Vainqueur QF5','Vainqueur QF6'],['1/4 D','19 juil.','Vainqueur QF7','Vainqueur QF8']
+  ].forEach(function(m){ html += tbd(m[0],m[1],m[2],m[3]); });
+  html += '</div>';
+
+  html += sep('DEMI-FINALES','22 &mdash; 23 juillet 2026')+'<div class="bg">';
+  html += tbd('1/2 A','22 juil.','Vainqueur 1/4 A','Vainqueur 1/4 B');
+  html += tbd('1/2 B','23 juil.','Vainqueur 1/4 C','Vainqueur 1/4 D');
+  html += '</div>';
+
+  html += sep('PETITE FINALE','25 juillet 2026 &mdash; Miami')+'<div class="fw">'+tbd('3e place','25 juil.','Perdant 1/2 A','Perdant 1/2 B')+'</div>';
+
+  html += '<div class="fl"><div class="fll"></div><span class="flb">FINALE</span><div class="fll"></div></div>';
+  html += '<div class="fi">19 JUILLET 2026 &middot; METLIFE STADIUM NEW YORK &middot; 19h CEST</div>';
+  html += '<div class="fw"><div class="fc"><div class="fh"><span>FINALE MONDIALE</span><span>19 juil. 19h</span></div><div class="ft">Vainqueur 1/2 A</div><div class="ft">Vainqueur 1/2 B</div></div></div>';
+  html += '<div class="trophy">&#127942;</div>';
+
+  document.getElementById('tableau').innerHTML = html;
+}
+
+// Auto-refresh toutes les heures
+setInterval(loadData, 60 * 60 * 1000);
+
+// Chargement initial
+loadData();
 </script>
 </body>
 </html>
