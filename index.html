@@ -116,61 +116,57 @@ body{background:#0a3d1f;color:#f5f5f0;font-family:Inter,sans-serif;min-height:10
 </div>
 
 <script>
-// Utilisation stricte d'entités HTML standards de type numériques
+// Utilisation exclusive d'émojis natifs directs pour l'intégralité du dictionnaire.
 var FLAGS = {
-  "Mexico":"&#127474;&#127485;",
-  "South Africa":"&#127487;&#127462;",
-  "South Korea":"&#127472;&#127479;",
-  "Czech Republic":"&#127464;&#127487;",
-  "Canada":"&#127464;&#127462;",
-  "Switzerland":"&#127464;&#127469;",
-  "Bosnia-Herzegovina":"&#127463;&#127462;",
-  "Qatar":"&#127478;&#127462;",
-  "Brazil":"&#127463;&#127479;",
-  "Morocco":"&#127474;&#127462;",
-  "Scotland":"",
-  "Haiti":"&#127469;&#127481;",
-  "United States":"&#127482;&#127480;",
-  "Australia":"&#127462;&#127482;",
-  "Paraguay":"&#127477;&#127486;",
-  "Turkey":"&#127481;&#127479;",
-  "Germany":"&#127465;&#127466;",
-  "Ivory Coast":"&#127464;&#127470;",
-  "Ecuador":"&#127466;&#127464;",
-  "Curacao":"&#127464;&#127484;",
-  "Netherlands":"&#127475;&#127473;",
-  "Japan":"&#127471;&#127477;",
-  "Sweden":"&#127480;&#127466;",
-  "Tunisia":"&#127481;&#127475;",
-  "Egypt":"&#127466;&#127468;",
-  "Iran":"&#127470;&#127479;",
-  "Belgium":"&#127463;&#127466;",
-  "New Zealand":"&#127475;&#127487;",
-  "Spain":"&#127466;&#127480;",
-  "Uruguay":"&#127482;&#127486;",
-  "Cape Verde":"&#127464;&#127483;",
-  "Saudi Arabia":"&#127480;&#127462;",
-  "France":"&#127467;&#127479;",
-  "Norway":"&#127475;&#127476;",
-  "Senegal":"&#127480;&#127475;",
-  "Iraq":"&#127470;&#127478;",
-  "Argentina":"&#127462;&#127479;",
-  "Austria":"&#127462;&#127481;",
-  "Algeria":"&#127465;&#127487;",
-  "Jordan":"&#127471;&#127476;",
-  "Colombia":"&#127464;&#127476;",
-  "Portugal":"&#127477;&#127481;",
-  "DR Congo":"&#127464;&#127465;",
-  "Uzbekistan":"&#127482;&#127487;",
-  "England":"",
-  "Ghana":"&#127468;&#127469;",
-  "Croatia":"&#127469;&#127479;",
-  "Panama":"&#127477;&#127462;"
+  "Mexico":"🇲🇽",
+  "South Africa":"🇿🇦",
+  "South Korea":"🇰🇷",
+  "Czech Republic":"🇨🇿",
+  "Canada":"🇨🇦",
+  "Switzerland":"🇨🇭",
+  "Bosnia-Herzegovina":"🇧🇦",
+  "Qatar":"🇶🇦",
+  "Brazil":"🇧🇷",
+  "Morocco":"🇲🇦",
+  "Scotland":"🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+  "Haiti":"🇭🇹",
+  "United States":"🇺🇸",
+  "Australia":"🇦🇺",
+  "Paraguay":"🇵🇾",
+  "Turkey":"🇹🇷",
+  "Germany":"🇩🇪",
+  "Ivory Coast":"🇨🇮",
+  "Ecuador":"🇪🇨",
+  "Curacao":"🇨🇼",
+  "Netherlands":"🇳🇱",
+  "Japan":"🇯🇵",
+  "Sweden":"🇸🇪",
+  "Tunisia":"🇹🇳",
+  "Egypt":"🇪🇬",
+  "Iran":"🇮🇷",
+  "Belgium":"🇧🇪",
+  "New Zealand":"🇳🇿",
+  "Spain":"🇪🇸",
+  "Uruguay":"🇺🇾",
+  "Cape Verde":"🇨🇻",
+  "Saudi Arabia":"🇸🇦",
+  "France":"🇫🇷",
+  "Norway":"🇳🇴",
+  "Senegal":"🇸🇳",
+  "Iraq":"🇮🇶",
+  "Argentina":"🇦🇷",
+  "Austria":"🇦🇹",
+  "Algeria":"🇩🇿",
+  "Jordan":"🇯🇴",
+  "Colombia":"🇨🇴",
+  "Portugal":"🇵🇹",
+  "DR Congo":"🇨🇩",
+  "Uzbekistan":"🇺🇿",
+  "England":"🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+  "Ghana":"🇬🇭",
+  "Croatia":"🇭🇷",
+  "Panama":"🇵🇦"
 };
-
-// Reconstitution dynamique sécurisée pour GitHub
-FLAGS["England"] = String.fromCodePoint(127988, 917607, 917602, 917605, 917606, 917612, 917631);
-FLAGS["Scotland"] = String.fromCodePoint(127988, 917607, 917602, 917619, 917603, 917620, 917631);
 
 var NAMES_FR = {
   "Mexico":"Mexique","South Africa":"Afr. du Sud","South Korea":"Corée du S.","Czech Republic":"Tchéquie",
@@ -193,7 +189,7 @@ var activeGrp = 'ALL';
 var currentTab = 'accueil';
 
 function fr(n){ return NAMES_FR[n]||n; }
-function flag(n){ return FLAGS[n]||'&#127463;&#127466;'; }
+function flag(n){ return FLAGS[n]||'🏳️'; }
 
 function showTab(id, btn) {
   document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
@@ -218,7 +214,7 @@ function loadData() {
 }
 
 function loadFallback() {
-  // Suppression totale des doublons de dates
+  // Base de données parfaitement nettoyée de tout doublon et triée nativement par dateISO
   var fallbackData = [
     {dateISO:'2026-06-11T19:00:00Z', dateLabel:'Jeudi 11 juin', dateShort:'11/06', timeLabel:'21:00', home:'Mexico', away:'South Africa', group:'A', status:'final', scoreH:2, scoreA:0},
     {dateISO:'2026-06-12T00:00:00Z', dateLabel:'Vendredi 12 juin', dateShort:'12/06', timeLabel:'02:00', home:'South Korea', away:'Czech Republic', group:'A', status:'final', scoreH:2, scoreA:1},
@@ -230,10 +226,12 @@ function loadFallback() {
     {dateISO:'2026-06-17T18:00:00Z', dateLabel:'Mercredi 17 juin', dateShort:'17/06', timeLabel:'20:00', home:'Uzbekistan', away:'Colombia', group:'K', status:'final', scoreH:1, scoreA:3},
     {dateISO:'2026-06-17T21:00:00Z', dateLabel:'Mercredi 17 juin', dateShort:'17/06', timeLabel:'23:00', home:'Portugal', away:'DR Congo', group:'K', status:'final', scoreH:1, scoreA:1},
     
+    {dateISO:'2026-06-18T23:00:00Z', dateLabel:'Vendredi 19 juin', dateShort:'19/06', timeLabel:'01:00', home:'South Africa', away:'South Korea', group:'A', status:'scheduled', scoreH:null, scoreA:null},
+    {dateISO:'2026-06-18T23:00:00Z', dateLabel:'Vendredi 19 juin', dateShort:'19/06', timeLabel:'01:00', home:'Czech Republic', away:'Mexico', group:'A', status:'scheduled', scoreH:null, scoreA:null},
     {dateISO:'2026-06-21T20:00:00Z', dateLabel:'Dimanche 21 juin', dateShort:'21/06', timeLabel:'22:00', home:'Uruguay', away:'Cape Verde', group:'H', status:'final', scoreH:2, scoreA:2},
     
     {dateISO:'2026-06-22T10:00:00Z', dateLabel:'Lundi 22 juin', dateShort:'22/06', timeLabel:'12:00', home:'Argentina', away:'Austria', group:'J', status:'final', scoreH:2, scoreA:0},
-    {dateISO:'2026-06-22+15:00:00Z', dateLabel:'Lundi 22 juin', dateShort:'22/06', timeLabel:'17:00', home:'France', away:'Iraq', group:'I', status:'final', scoreH:3, scoreA:0},
+    {dateISO:'2026-06-22T15:00:00Z', dateLabel:'Lundi 22 juin', dateShort:'22/06', timeLabel:'17:00', home:'France', away:'Iraq', group:'I', status:'final', scoreH:3, scoreA:0},
     {dateISO:'2026-06-22T18:00:00Z', dateLabel:'Lundi 22 juin', dateShort:'22/06', timeLabel:'20:00', home:'Norway', away:'Senegal', group:'I', status:'final', scoreH:3, scoreA:2},
     {dateISO:'2026-06-22T23:00:00Z', dateLabel:'Mardi 23 juin', dateShort:'23/06', timeLabel:'01:00', home:'Jordan', away:'Algeria', group:'J', status:'final', scoreH:1, scoreA:2},
     
@@ -254,6 +252,7 @@ function loadFallback() {
   ];
 
   allMatches = fallbackData;
+  // Tri strict et stable recommandé par dateISO
   allMatches.sort(function(a,b){ return a.dateISO.localeCompare(b.dateISO); });
 
   var groups = {};
@@ -279,6 +278,7 @@ function loadFallback() {
   });
 
   var now = new Date();
+  // Forçage de la timezone Europe/Brussels pour l'horloge de mise à jour
   document.getElementById('updateInfo').textContent = 'Mis à jour ' + now.toLocaleTimeString('fr-BE',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Brussels'});
   document.getElementById('btnRefresh').disabled = false;
   renderTab(currentTab);
@@ -293,6 +293,7 @@ function matchRow(m) {
   var hc = hW?'mh w':aW?'mh l':'mh';
   var ac = aW?'ma w':hW?'ma l':'ma';
   
+  // Alignement systématique de la donnée temporelle/score au centre de la carte
   var centerDisplay = done ? m.scoreH+' - '+m.scoreA : m.timeLabel;
 
   return '<div'+cls+'>'
@@ -333,11 +334,11 @@ function renderAccueil() {
   html += '<div class="stat"><div class="stat-n">'+totalFinished+'</div><div class="stat-l">Joués</div></div>';
   html += '<div class="stat"><div class="stat-n">12</div><div class="stat-l">Groupes</div></div>';
   html += '<div class="stat"><div class="stat-n">48</div><div class="stat-l">Nations</div></div>';
-  html += '<div class="stat"><div class="stat-n" style="font-family:Inter,sans-serif;font-size:1.6rem">&#127463;&#127466;</div><div class="stat-l">Grp G</div></div>';
+  html += '<div class="stat"><div class="stat-n" style="font-family:Inter,sans-serif;font-size:1.6rem">🇧🇪</div><div class="stat-l">Grp G</div></div>';
   html += '</div>';
 
   if(belG.length) {
-    html += '<div class="card bel"><div class="card-title bel">&#127463;&#127466; Belgique &mdash; Groupe G</div>'+standingsTable(belG)+'</div>';
+    html += '<div class="card bel"><div class="card-title bel">🇧🇪 Belgique &mdash; Groupe G</div>'+standingsTable(belG)+'</div>';
   }
 
   html += '<div class="card"><div class="card-title">Derniers résultats</div>';
@@ -476,7 +477,6 @@ function renderTableau() {
   document.getElementById('tableau').innerHTML = html;
 }
 
-// Lancement automatique sans API défectueuse
 loadData();
 </script>
 </body>
