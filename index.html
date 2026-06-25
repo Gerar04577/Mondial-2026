@@ -149,7 +149,7 @@ h1{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:4px;color
 
 <script>
 var FL={MEX:"&#127474;&#127485;",KOR:"&#127472;&#127479;",CZE:"&#127464;&#127487;",RSA:"&#127487;&#127462;",CAN:"&#127464;&#127462;",SUI:"&#127464;&#127469;",BIH:"&#127463;&#127462;",QAT:"&#127478;&#127462;",BRA:"&#127463;&#127479;",MAR:"&#127474;&#127462;",SCO:"&#127480;&#127464;",HTI:"&#127469;&#127481;",USA:"&#127482;&#127480;",AUS:"&#127462;&#127482;",PAR:"&#127477;&#127486;",TUR:"&#127481;&#127479;",GER:"&#127465;&#127466;",CIV:"&#127464;&#127470;",ECU:"&#127466;&#127464;",CUW:"&#127464;&#127484;",NED:"&#127475;&#127473;",JPN:"&#127471;&#127477;",SWE:"&#127480;&#127466;",TUN:"&#127481;&#127475;",EGY:"&#127466;&#127468;",IRN:"&#127470;&#127479;",BEL:"&#127463;&#127466;",NZL:"&#127475;&#127487;",ESP:"&#127466;&#127480;",URU:"&#127482;&#127486;",CPV:"&#127464;&#127483;",KSA:"&#127480;&#127462;",FRA:"&#127467;&#127479;",NOR:"&#127475;&#127476;",SEN:"&#127480;&#127475;",IRQ:"&#127470;&#127478;",ARG:"&#127462;&#127479;",AUT:"&#127462;&#127481;",DZA:"&#127465;&#127487;",JOR:"&#127471;&#127476;",COL:"&#127464;&#127476;",POR:"&#127477;&#127481;",COD:"&#127464;&#127465;",UZB:"&#127482;&#127487;",ENG:"&#127968;",GHA:"&#127468;&#127469;",CRO:"&#127469;&#127479;",PAN:"&#127477;&#127462;"};
-var FR={Mexico:"Mexique","South Africa":"Afr. Sud","South Korea":"Coree S.",Czechia:"Tcheque","Czech Republic":"Tcheque",Canada:"Canada",Switzerland:"Suisse","Bosnia and Herzegovina":"Bosnie","Bosnia-Herzegovina":"Bosnie",Qatar:"Qatar",Brazil:"Bresil",Morocco:"Maroc",Scotland:"Ecosse",Haiti:"Haiti","United States":"Etats-Unis",USA:"Etats-Unis",Australia:"Australie",Paraguay:"Paraguay",Turkiye:"Turquie",Turkey:"Turquie",Germany:"Allemagne","Ivory Coast":"Cote Ivoire",Ecuador:"Equateur",Curacao:"Curacao",Netherlands:"Pays-Bas",Japan:"Japon",Sweden:"Suede",Tunisia:"Tunisie",Egypt:"Egypte","IR Iran":"Iran",Iran:"Iran",Belgium:"Belgique","New Zealand":"N-Zelande",Spain:"Espagne",Uruguay:"Uruguay","Cape Verde":"Cap-Vert","Saudi Arabia":"Arabie Sao.",France:"France",Norway:"Norvege",Senegal:"Senegal",Iraq:"Iraq",Argentina:"Argentine",Austria:"Autriche",Algeria:"Algerie",Jordan:"Jordanie",Colombia:"Colombie",Portugal:"Portugal","Congo DR":"Congo RD","DR Congo":"Congo RD",Uzbekistan:"Ouzbekistan",England:"Angleterre",Ghana:"Ghana",Croatia:"Croatie",Panama:"Panama","Korea Republic":"Coree S."};
+var FR={Mexico:"Mexique","South Africa":"Afr. Sud","South Korea":"Coree S.",Czechia:"Tcheque","Czech Republic":"Tcheque",Canada:"Canada",Switzerland:"Suisse","Bosnia and Herzegovina":"Bosnie","Bosnia-Herzegovina":"Bosnie",Qatar:"Qatar",Brazil:"Bresil",Morocco:"Maroc",Scotland:"Ecosse",Haiti:"Haiti","United States":"Etats-Unis",USA:"Etats-Unis",Australia:"Australie",Paraguay:"Paraguay",Turkiye:"Turquie",Turkey:"Turquie",Germany:"Allemagne","Ivory Coast":"Cote Ivoire","Cote d'Ivoire":"Cote Ivoire",Ecuador:"Equateur",Curacao:"Curacao",Netherlands:"Pays-Bas",Japan:"Japon",Sweden:"Suede",Tunisia:"Tunisie",Egypt:"Egypte","IR Iran":"Iran",Iran:"Iran",Belgium:"Belgique","New Zealand":"N-Zelande",Spain:"Espagne",Uruguay:"Uruguay","Cape Verde":"Cap-Vert","Saudi Arabia":"Arabie Sao.",France:"France",Norway:"Norvege",Senegal:"Senegal",Iraq:"Iraq",Argentina:"Argentine",Austria:"Autriche",Algeria:"Algerie",Jordan:"Jordanie",Colombia:"Colombie",Portugal:"Portugal","Congo DR":"Congo RD","DR Congo":"Congo RD",Uzbekistan:"Ouzbekistan",England:"Angleterre",Ghana:"Ghana",Croatia:"Croatie",Panama:"Panama","Korea Republic":"Coree S."};
 var allM=[],allS=[],curTab="accueil",activeGrp="ALL",refreshTimer=null;
 
 function fl(a){return FL[a]||"&#127988;";}
@@ -224,8 +224,8 @@ function renderTab(id){
 // ── ACCUEIL ──────────────────────────────────────────────
 function renderAccueil(){
   var live=allM.filter(function(m){return m.status==="in_progress";});
-  var fin=allM.filter(function(m){return m.status==="final";});
-  var up=allM.filter(function(m){return m.status==="scheduled";}).slice(0,4);
+  var fin=allM.filter(function(m){return m.status==="final";}).sort(function(a,b){return new Date(b.start)-new Date(a.start);});
+  var up=allM.filter(function(m){return m.status==="scheduled";}).sort(function(a,b){return new Date(a.start)-new Date(b.start);}).slice(0,4);
   var belG=allS.filter(function(t){return t.g==="G";});
   var h="";
 
@@ -260,7 +260,7 @@ function renderAccueil(){
 
   // Derniers resultats
   h+='<div class="card"><div class="ct">Derniers resultats</div>';
-  var rec=fin.slice(-6).reverse();
+  var rec=fin.slice(0,6);
   if(rec.length)rec.forEach(function(m){h+=mrow(m);});
   else h+='<div style="padding:14px;color:var(--grey);text-align:center">Aucun resultat</div>';
   h+='</div>';
@@ -277,7 +277,7 @@ function renderAccueil(){
 // ── RESULTATS ────────────────────────────────────────────
 function renderResultats(){
   var live=allM.filter(function(m){return m.status==="in_progress";});
-  var fin=allM.filter(function(m){return m.status==="final";}).reverse();
+  var fin=allM.filter(function(m){return m.status==="final";}).sort(function(a,b){return new Date(b.start)-new Date(a.start);});
   var h="";
 
   if(live.length){
@@ -322,18 +322,19 @@ function ugb(b){document.querySelectorAll(".gb").forEach(function(x){x.classList
 
 // ── A VENIR ──────────────────────────────────────────────
 function renderAvenir(){
-  var up=allM.filter(function(m){return m.status==="scheduled";});
+  var up=allM.filter(function(m){return m.status==="scheduled";}).sort(function(a,b){return new Date(a.start)-new Date(b.start);});
   var bd={};
   up.forEach(function(m){var d=fmtDL(m.start);if(!bd[d])bd[d]=[];bd[d].push(m);});
   var h="";
   Object.entries(bd).forEach(function(e){
     h+='<div class="dsep">'+e[0]+'</div><div class="card">';
     e[1].forEach(function(m){
+      var label=m.group?"Grp "+m.group:(m.phase||"");
       h+='<div class="upm"><div class="upi">';
       h+='<div class="upt"><div class="un">'+fl(m.home)+' '+fn(m.homeN||m.home)+'</div>';
       if(m.probH){h+='<div class="pb"><div class="pf" style="width:'+m.probH+'%"></div></div>';h+='<div class="pp">'+m.probH+'%</div>';}
       h+='</div>';
-      h+='<div class="upc"><div class="ucg">Grp '+m.group+'</div><div class="uch">'+fmtH(m.start)+'</div><div class="ucd">'+fmtD(m.start)+'</div></div>';
+      h+='<div class="upc"><div class="ucg">'+label+'</div><div class="uch">'+fmtH(m.start)+'</div><div class="ucd">'+fmtD(m.start)+'</div></div>';
       h+='<div class="upt r"><div class="un">'+fn(m.awayN||m.away)+' '+fl(m.away)+'</div>';
       if(m.probA){h+='<div class="pb" style="direction:rtl"><div class="pf" style="width:'+m.probA+'%"></div></div>';h+='<div class="pp r">'+m.probA+'%</div>';}
       h+='</div></div></div>';
@@ -376,7 +377,8 @@ function mrow(m){
   var hc=hW?"mh w":aW?"mh l":"mh";
   var ac=aW?"ma w":hW?"ma l":"ma";
   var sc=done?'<span class="sv">'+m.scoreH+' - '+m.scoreA+'</span>':'<span class="vs">VS</span>';
-  return '<div class="'+cls+'"><span class="'+hc+'">'+fl(m.home)+' '+fn(m.homeN||m.home)+'</span><div class="ms">'+sc+'</div><span class="'+ac+'">'+fn(m.awayN||m.away)+' '+fl(m.away)+'</span><div class="mt"><div class="mg">Grp '+m.group+' '+fmtD(m.start)+'</div><div class="mhr">'+fmtH(m.start)+'</div></div></div>';
+  var label=m.group?("Grp "+m.group):(m.phase||"");
+  return '<div class="'+cls+'"><span class="'+hc+'">'+fl(m.home)+' '+fn(m.homeN||m.home)+'</span><div class="ms">'+sc+'</div><span class="'+ac+'">'+fn(m.awayN||m.away)+' '+fl(m.away)+'</span><div class="mt"><div class="mg">'+label+' '+fmtD(m.start)+'</div><div class="mhr">'+fmtH(m.start)+'</div></div></div>';
 }
 
 function stbl(teams){
