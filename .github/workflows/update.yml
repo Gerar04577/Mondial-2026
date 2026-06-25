@@ -14,110 +14,139 @@ jobs:
           python3 - << 'EOF'
           import json, urllib.request, datetime
 
-          FR={"Mexico":"Mexique","South Africa":"Afr. Sud","Korea Republic":"Coree S.","Czechia":"Tcheque","Czech Republic":"Tcheque","Canada":"Canada","Switzerland":"Suisse","Bosnia and Herzegovina":"Bosnie","Qatar":"Qatar","Brazil":"Bresil","Morocco":"Maroc","Scotland":"Ecosse","Haiti":"Haiti","United States":"Etats-Unis","Australia":"Australie","Paraguay":"Paraguay","Turkiye":"Turquie","Turkey":"Turquie","Germany":"Allemagne","Cote d'Ivoire":"Cote Ivoire","Ivory Coast":"Cote Ivoire","Ecuador":"Equateur","Curacao":"Curacao","Netherlands":"Pays-Bas","Japan":"Japon","Sweden":"Suede","Tunisia":"Tunisie","Egypt":"Egypte","IR Iran":"Iran","Iran":"Iran","Belgium":"Belgique","New Zealand":"N-Zelande","Spain":"Espagne","Uruguay":"Uruguay","Cape Verde":"Cap-Vert","Saudi Arabia":"Arabie Sao.","France":"France","Norway":"Norvege","Senegal":"Senegal","Iraq":"Iraq","Argentina":"Argentine","Austria":"Autriche","Algeria":"Algerie","Jordan":"Jordanie","Colombia":"Colombie","Portugal":"Portugal","Congo DR":"Congo RD","DR Congo":"Congo RD","Uzbekistan":"Ouzbekistan","England":"Angleterre","Ghana":"Ghana","Croatia":"Croatie","Panama":"Panama"}
-          ABB={"Mexico":"MEX","South Africa":"RSA","Korea Republic":"KOR","Czechia":"CZE","Czech Republic":"CZE","Canada":"CAN","Switzerland":"SUI","Bosnia and Herzegovina":"BIH","Qatar":"QAT","Brazil":"BRA","Morocco":"MAR","Scotland":"SCO","Haiti":"HTI","United States":"USA","Australia":"AUS","Paraguay":"PAR","Turkiye":"TUR","Turkey":"TUR","Germany":"GER","Cote d'Ivoire":"CIV","Ivory Coast":"CIV","Ecuador":"ECU","Curacao":"CUW","Netherlands":"NED","Japan":"JPN","Sweden":"SWE","Tunisia":"TUN","Egypt":"EGY","IR Iran":"IRN","Iran":"IRN","Belgium":"BEL","New Zealand":"NZL","Spain":"ESP","Uruguay":"URU","Cape Verde":"CPV","Saudi Arabia":"KSA","France":"FRA","Norway":"NOR","Senegal":"SEN","Iraq":"IRQ","Argentina":"ARG","Austria":"AUT","Algeria":"DZA","Jordan":"JOR","Colombia":"COL","Portugal":"POR","Congo DR":"COD","DR Congo":"COD","Uzbekistan":"UZB","England":"ENG","Ghana":"GHA","Croatia":"CRO","Panama":"PAN"}
+          FR={"France":"France","Senegal":"Senegal","Haiti":"Haiti","Paraguay":"Paraguay","Mexico":"Mexique","South Africa":"Afr. Sud","South Korea":"Coree S.","Czech Republic":"Tcheque","Canada":"Canada","Switzerland":"Suisse","Bosnia and Herzegovina":"Bosnie","Qatar":"Qatar","Brazil":"Bresil","Morocco":"Maroc","Scotland":"Ecosse","United States":"Etats-Unis","Australia":"Australie","Turkiye":"Turquie","Germany":"Allemagne","Cote d'Ivoire":"Cote Ivoire","Ivory Coast":"Cote Ivoire","Ecuador":"Equateur","Curacao":"Curacao","Netherlands":"Pays-Bas","Japan":"Japon","Sweden":"Suede","Tunisia":"Tunisie","Egypt":"Egypte","Iran":"Iran","Belgium":"Belgique","New Zealand":"N-Zelande","Spain":"Espagne","Uruguay":"Uruguay","Cape Verde":"Cap-Vert","Saudi Arabia":"Arabie Sao.","Norway":"Norvege","Iraq":"Iraq","Argentina":"Argentine","Austria":"Autriche","Algeria":"Algerie","Jordan":"Jordanie","Colombia":"Colombie","Portugal":"Portugal","DR Congo":"Congo RD","Uzbekistan":"Ouzbekistan","England":"Angleterre","Ghana":"Ghana","Croatia":"Croatie","Panama":"Panama","Korea Republic":"Coree S."}
 
-          def safe_int(v):
+          PHASE_FR = {
+              "group-stage": "Groupes",
+              "round-of-32": "16es de finale",
+              "round-of-16": "8es de finale",
+              "quarterfinals": "Quarts de finale",
+              "semifinals": "Demi-finales",
+              "third-place": "Petite finale",
+              "final": "Finale"
+          }
+
+          def fetch_url(url):
+              req = urllib.request.Request(url, headers={"User-Agent":"Mozilla/5.0"})
+              r = urllib.request.urlopen(req, timeout=15)
+              return json.loads(r.read())
+
+          # Toutes les dates du tournoi: 11 juin au 19 juillet 2026
+          start_date = datetime.date(2026, 6, 11)
+          end_date = datetime.date(2026, 7, 19)
+          all_events = []
+          seen_ids = set()
+
+          current = start_date
+          while current <= end_date:
+              date_str = current.strftime("%Y%m%d")
               try:
-                  return int(v) if v not in (None,"null","","NULL") else 0
-              except:
-                  return 0
+                  url = f"https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates={date_str}&limit=20"
+                  data = fetch_url(url)
+                  events = data.get("events", [])
+                  for e in events:
+                      eid = e.get("id")
+                      if eid not in seen_ids:
+                          seen_ids.add(eid)
+                          all_events.append(e)
+              except Exception as ex:
+                  pass
+              current += datetime.timedelta(days=1)
 
-          # Normalise le nom pour matching
-          def norm(n):
-              return (n or "").lower().strip().replace("'","").replace("-","")
+          print(f"ESPN total: {len(all_events)} matchs uniques")
 
-          # Etape 1: TheStatsAPI - horaires UTC fiables pour tous les 104 matchs
-          fixtures = {}
-          try:
-              r = urllib.request.urlopen("https://www.thestatsapi.com/world-cup/data/fixtures.json", timeout=10)
-              data = json.loads(r.read())
-              for m in data.get("fixtures", []):
-                  h = norm(m.get("homeTeam",""))
-                  a = norm(m.get("awayTeam",""))
-                  key = h + "__" + a
-                  fixtures[key] = {
-                      "start": m.get("kickoffUtc",""),
-                      "group": m.get("group","")
-                  }
-              print(f"TheStatsAPI: {len(fixtures)} matchs charges")
-          except Exception as e:
-              print(f"TheStatsAPI failed: {e}")
-
-          # Etape 2: worldcup26.ir - scores live et statuts
-          try:
-              r = urllib.request.urlopen("https://worldcup26.ir/get/games", timeout=10)
-              raw = json.loads(r.read())
-          except Exception as e:
-              print(f"worldcup26.ir failed: {e}")
-              exit(0)
-
-          items = raw if isinstance(raw, list) else raw.get("games", [])
           games = []
           sm = {}
 
-          for m in items:
-              g = m.get("group","")
-              if not g or g in ("R32","R16","QF","SF","F","3P"):
-                  continue
-              h = m.get("home_team_name_en") or m.get("home_team_label") or m.get("home_team","")
-              a = m.get("away_team_name_en") or m.get("away_team_label") or m.get("away_team","")
-              if not h or not a:
+          for e in all_events:
+              comp = e.get("competitions", [{}])[0]
+              competitors = comp.get("competitors", [])
+              if len(competitors) < 2:
                   continue
 
-              ha = ABB.get(h, h[:3].upper())
-              aa = ABB.get(a, a[:3].upper())
-              fin = str(m.get("finished","")).upper() == "TRUE"
-              elapsed = str(m.get("time_elapsed","") or "")
-              inp = elapsed.lower() not in ("","notstarted","finished")
-              status = "final" if fin else ("in_progress" if inp else "scheduled")
-              sH = safe_int(m.get("home_score"))
-              sA = safe_int(m.get("away_score"))
-              el = elapsed if status == "in_progress" else ""
+              home = next((c for c in competitors if c.get("homeAway")=="home"), competitors[0])
+              away = next((c for c in competitors if c.get("homeAway")=="away"), competitors[1])
+              hN = home.get("team",{}).get("displayName","")
+              aN = away.get("team",{}).get("displayName","")
+              hA = home.get("team",{}).get("abbreviation","")
+              aA = away.get("team",{}).get("abbreviation","")
 
-              # Etape 3: correspondance par nom normalise
-              key = norm(h) + "__" + norm(a)
-              key_rev = norm(a) + "__" + norm(h)  # essai inverse si besoin
-              fix = fixtures.get(key) or fixtures.get(key_rev)
+              # Phase du match
+              slug = e.get("season",{}).get("slug","")
 
-              if fix:
-                  start = fix["start"]  # UTC pur - index.html convertit en CEST
-                  grp = fix["group"] or g
+              # Groupe (phase de groupes uniquement)
+              note = comp.get("altGameNote","")
+              grp = ""
+              if "Group" in note:
+                  grp = note.split("Group ")[-1].strip()[:1]
+                  if not grp.isalpha():
+                      grp = ""
+
+              # Phase lisible
+              phase = PHASE_FR.get(slug, slug)
+
+              # Statut
+              status_obj = comp.get("status",{}).get("type",{})
+              state = status_obj.get("state","")
+              completed = status_obj.get("completed", False)
+              if completed or state == "post":
+                  status = "final"
+              elif state == "in":
+                  status = "in_progress"
               else:
-                  # Fallback: garder la date de worldcup26.ir
-                  try:
-                      dt = datetime.datetime.strptime(m.get("local_date",""), "%m/%d/%Y %H:%M")
-                      start = dt.strftime("%Y-%m-%dT%H:%M:%SZ")
-                  except:
-                      start = ""
-                  grp = g
-                  print(f"No match for: {h} vs {a}")
+                  status = "scheduled"
 
-              games.append({"id":str(m.get("id","")),"status":status,"start":start,"home":ha,"away":aa,"homeN":FR.get(h,h),"awayN":FR.get(a,a),"group":grp,"scoreH":sH,"scoreA":sA,"elapsed":el})
+              sH = int(home.get("score","0") or 0) if status != "scheduled" else 0
+              sA = int(away.get("score","0") or 0) if status != "scheduled" else 0
+              start = e.get("date","")
+              clock = comp.get("status",{}).get("displayClock","")
+              el = clock if status == "in_progress" else ""
 
-              if grp not in sm:
-                  sm[grp] = {}
-              for t, ab in [(h,ha),(a,aa)]:
-                  if ab not in sm[grp]:
-                      sm[grp][ab] = {"a":ab,"n":FR.get(t,t),"g":grp,"j":0,"v":0,"nul":0,"d":0,"pts":0}
-              if fin:
-                  sm[grp][ha]["j"]+=1; sm[grp][aa]["j"]+=1
-                  if sH>sA: sm[grp][ha]["v"]+=1; sm[grp][ha]["pts"]+=3; sm[grp][aa]["d"]+=1
-                  elif sA>sH: sm[grp][aa]["v"]+=1; sm[grp][aa]["pts"]+=3; sm[grp][ha]["d"]+=1
-                  else: sm[grp][ha]["nul"]+=1; sm[grp][ha]["pts"]+=1; sm[grp][aa]["nul"]+=1; sm[grp][aa]["pts"]+=1
+              hFR = FR.get(hN, hN)
+              aFR = FR.get(aN, aN)
+
+              games.append({
+                  "id": e.get("id",""),
+                  "status": status,
+                  "start": start,
+                  "home": hA,
+                  "away": aA,
+                  "homeN": hFR,
+                  "awayN": aFR,
+                  "group": grp,
+                  "phase": phase,
+                  "scoreH": sH,
+                  "scoreA": sA,
+                  "elapsed": el
+              })
+
+              # Classements phase de groupes uniquement
+              if grp:
+                  if grp not in sm:
+                      sm[grp] = {}
+                  for name, abb, frname in [(hN,hA,hFR),(aN,aA,aFR)]:
+                      if abb not in sm[grp]:
+                          sm[grp][abb] = {"a":abb,"n":frname,"g":grp,"j":0,"v":0,"nul":0,"d":0,"pts":0}
+                  if status == "final":
+                      sm[grp][hA]["j"]+=1; sm[grp][aA]["j"]+=1
+                      if sH>sA: sm[grp][hA]["v"]+=1; sm[grp][hA]["pts"]+=3; sm[grp][aA]["d"]+=1
+                      elif sA>sH: sm[grp][aA]["v"]+=1; sm[grp][aA]["pts"]+=3; sm[grp][hA]["d"]+=1
+                      else: sm[grp][hA]["nul"]+=1; sm[grp][hA]["pts"]+=1; sm[grp][aA]["nul"]+=1; sm[grp][aA]["pts"]+=1
 
           st = []
           for grp in sorted(sm.keys()):
-              ts = sorted(sm[grp].values(), key=lambda x: -x["pts"])
+              ts = sorted(sm[grp].values(), key=lambda x:-x["pts"])
               for i,t in enumerate(ts):
-                  t["r"] = i+1; st.append(t)
+                  t["r"]=i+1; st.append(t)
 
-          now = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-          out = {"updated":now,"source":"thestatsapi+worldcup26","games":games,"standings":st}
+          now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+          live = [g for g in games if g["status"]=="in_progress"]
+          grp_games = [g for g in games if g["group"]]
+          ko_games = [g for g in games if not g["group"]]
+          out = {"updated":now,"source":"ESPN","games":games,"standings":st}
           with open("worldcup.json","w",encoding="utf-8") as f:
               json.dump(out,f,ensure_ascii=False)
-          live = [g for g in games if g["status"]=="in_progress"]
-          print(f"OK: {len(games)} matchs, {len(live)} en cours")
+          print(f"OK: {len(grp_games)} matchs groupe + {len(ko_games)} eliminatoires, {len(live)} en cours")
           EOF
       - run: |
           git config user.name bot
