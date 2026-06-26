@@ -167,6 +167,36 @@ function showTab(id,btn){
   renderTab(id);
 }
 
+var AF_KEY="8007e7f96b5c5c2c6ac35fa56c77a33e";
+var AF_ABB={"Mexico":"MEX","South Africa":"RSA","Korea Republic":"KOR","Czech Republic":"CZE","Canada":"CAN","Switzerland":"SUI","Bosnia and Herzegovina":"BIH","Qatar":"QAT","Brazil":"BRA","Morocco":"MAR","Scotland":"SCO","Haiti":"HTI","United States":"USA","Australia":"AUS","Paraguay":"PAR","Turkiye":"TUR","Turkey":"TUR","Germany":"GER","Cote d'Ivoire":"CIV","Ivory Coast":"CIV","Ecuador":"ECU","Curacao":"CUW","Netherlands":"NED","Japan":"JPN","Sweden":"SWE","Tunisia":"TUN","Egypt":"EGY","IR Iran":"IRN","Iran":"IRN","Belgium":"BEL","New Zealand":"NZL","Spain":"ESP","Uruguay":"URU","Cape Verde":"CPV","Saudi Arabia":"KSA","France":"FRA","Norway":"NOR","Senegal":"SEN","Iraq":"IRQ","Argentina":"ARG","Austria":"AUT","Algeria":"DZA","Jordan":"JOR","Colombia":"COL","Portugal":"POR","DR Congo":"COD","Uzbekistan":"UZB","England":"ENG","Ghana":"GHA","Croatia":"CRO","Panama":"PAN"};
+
+function updateLiveScores(){
+  return fetch("https://v3.football.api-sports.io/fixtures?live=all",{
+    headers:{"x-apisports-key":AF_KEY}
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    (data.response||[]).forEach(function(m){
+      if(!m.league||m.league.id!==1||m.league.season!==2026)return;
+      var hAbb=AF_ABB[m.teams.home.name]||"";
+      var aAbb=AF_ABB[m.teams.away.name]||"";
+      if(!hAbb||!aAbb)return;
+      var elapsed=m.fixture.status.elapsed||0;
+      var sH=m.goals.home||0;
+      var sA=m.goals.away||0;
+      allM.forEach(function(g){
+        if(g.home===hAbb&&g.away===aAbb){
+          g.status="in_progress";
+          g.scoreH=sH;
+          g.scoreA=sA;
+          g.elapsed=elapsed+"'";
+        }
+      });
+    });
+  })
+  .catch(function(){});
+}
+
 function loadData(){
   var btn=document.getElementById("btnr");
   var ico=document.getElementById("rico");
@@ -180,26 +210,30 @@ function loadData(){
     .then(function(data){
       allM=data.games||[];
       allS=data.standings||[];
-      var upd=data.updated||"";
       var src=data.source||"";
       var live=allM.filter(function(m){return m.status==="in_progress";});
-      var now=new Date();
-      info.textContent="Mis a jour "+now.toLocaleTimeString("fr-BE",{hour:"2-digit",minute:"2-digit"});
-      if(src)info.textContent+=" ("+src+")";
-      var lind=document.getElementById("liveind");
-      if(live.length>0){
-        lind.style.display="inline-flex";
-        lind.textContent="";
-        var dot=document.createElement("span");dot.className="live-dot";
-        lind.appendChild(dot);
-        lind.appendChild(document.createTextNode(" "+live.length+" EN COURS"));
-        scheduleRefresh(true);
-      } else {
-        lind.style.display="none";
-        scheduleRefresh(false);
-      }
-      btn.disabled=false;ico.className="";ico.innerHTML="&#8635;";
-      renderTab(curTab);
+      // Si matchs en cours, appel direct API-Football pour minutes a jour
+      var livePromise=live.length>0?updateLiveScores():Promise.resolve(false);
+      return livePromise.then(function(){
+        var now=new Date();
+        info.textContent="Mis a jour "+now.toLocaleTimeString("fr-BE",{hour:"2-digit",minute:"2-digit"});
+        if(src)info.textContent+=" ("+src+")";
+        var liveNow=allM.filter(function(m){return m.status==="in_progress";});
+        var lind=document.getElementById("liveind");
+        if(liveNow.length>0){
+          lind.style.display="inline-flex";
+          lind.textContent="";
+          var dot=document.createElement("span");dot.className="live-dot";
+          lind.appendChild(dot);
+          lind.appendChild(document.createTextNode(" "+liveNow.length+" EN COURS"));
+          scheduleRefresh(true);
+        } else {
+          lind.style.display="none";
+          scheduleRefresh(false);
+        }
+        btn.disabled=false;ico.className="";ico.innerHTML="&#8635;";
+        renderTab(curTab);
+      });
     })
     .catch(function(e){
       info.textContent="Erreur - verifiez la connexion";
