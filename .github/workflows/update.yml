@@ -52,10 +52,14 @@ jobs:
           live_index = {}
           try:
               af = fetch(
-                  "https://v3.football.api-sports.io/fixtures?league=1&season=2026&status=1H-HT-2H-ET-P",
+                  "https://v3.football.api-sports.io/fixtures?live=all",
                   {"x-apisports-key": API_FOOTBALL_KEY}
               )
               for m in af.get("response", []):
+                  # Filtrer uniquement les matchs du Mondial 2026
+                  league = m.get("league", {})
+                  if league.get("id") != 1 or league.get("season") != 2026:
+                      continue
                   h = norm(m["teams"]["home"]["name"])
                   a = norm(m["teams"]["away"]["name"])
                   key = norm_key(h, a)
@@ -77,7 +81,7 @@ jobs:
                   "https://api.football-data.org/v4/competitions/WC/standings?season=2026",
                   {"X-Auth-Token": FOOTBALL_DATA_KEY}
               )
-              for grp_data in fd.get("standings", []):
+              for grp_data in fd.get("standings", []) or []:
                   if grp_data.get("type") != "TOTAL": continue
                   grp_raw = grp_data.get("group", "")
                   grp = grp_raw.replace("GROUP_", "")[:1] if "GROUP_" in grp_raw else ""
