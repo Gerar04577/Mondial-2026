@@ -14,74 +14,150 @@ jobs:
           python3 - << 'EOF'
           import json, urllib.request, datetime, re
 
+          API_FOOTBALL_KEY = "8007e7f96b5c5c2c6ac35fa56c77a33e"
+          FOOTBALL_DATA_KEY = "5a61be4834e04fb1a42312256e421398"
+
           ABB={"Mexico":"MEX","South Africa":"RSA","South Korea":"KOR","Czech Republic":"CZE","Canada":"CAN","Switzerland":"SUI","Bosnia-Herzegovina":"BIH","Qatar":"QAT","Brazil":"BRA","Morocco":"MAR","Scotland":"SCO","Haiti":"HTI","United States":"USA","Australia":"AUS","Paraguay":"PAR","Turkey":"TUR","Germany":"GER","Ivory Coast":"CIV","Ecuador":"ECU","Curacao":"CUW","Netherlands":"NED","Japan":"JPN","Sweden":"SWE","Tunisia":"TUN","Egypt":"EGY","Iran":"IRN","Belgium":"BEL","New Zealand":"NZL","Spain":"ESP","Uruguay":"URU","Cape Verde":"CPV","Saudi Arabia":"KSA","France":"FRA","Norway":"NOR","Senegal":"SEN","Iraq":"IRQ","Argentina":"ARG","Austria":"AUT","Algeria":"DZA","Jordan":"JOR","Colombia":"COL","Portugal":"POR","DR Congo":"COD","Uzbekistan":"UZB","England":"ENG","Ghana":"GHA","Croatia":"CRO","Panama":"PAN"}
           FR={"Mexico":"Mexique","South Africa":"Afr. Sud","South Korea":"Coree S.","Czech Republic":"Tcheque","Canada":"Canada","Switzerland":"Suisse","Bosnia-Herzegovina":"Bosnie","Qatar":"Qatar","Brazil":"Bresil","Morocco":"Maroc","Scotland":"Ecosse","Haiti":"Haiti","United States":"Etats-Unis","Australia":"Australie","Paraguay":"Paraguay","Turkey":"Turquie","Germany":"Allemagne","Ivory Coast":"Cote Ivoire","Ecuador":"Equateur","Curacao":"Curacao","Netherlands":"Pays-Bas","Japan":"Japon","Sweden":"Suede","Tunisia":"Tunisie","Egypt":"Egypte","Iran":"Iran","Belgium":"Belgique","New Zealand":"N-Zelande","Spain":"Espagne","Uruguay":"Uruguay","Cape Verde":"Cap-Vert","Saudi Arabia":"Arabie Sao.","France":"France","Norway":"Norvege","Senegal":"Senegal","Iraq":"Iraq","Argentina":"Argentine","Austria":"Autriche","Algeria":"Algerie","Jordan":"Jordanie","Colombia":"Colombie","Portugal":"Portugal","DR Congo":"Congo RD","Uzbekistan":"Ouzbekistan","England":"Angleterre","Ghana":"Ghana","Croatia":"Croatie","Panama":"Panama"}
           PHASE_FR={"Round of 32":"16es de finale","Round of 16":"8es de finale","Quarterfinals":"Quarts de finale","Semifinals":"Demi-finales","Third place":"Petite finale","Final":"Finale"}
+          API_MAPPING={"Bosnia and Herzegovina":"Bosnia-Herzegovina","Korea Republic":"South Korea","Turkiye":"Turkey","Cote d'Ivoire":"Ivory Coast","Ivory Coast":"Ivory Coast","New Zealand":"New Zealand","DR Congo":"DR Congo"}
+
+          def fetch(url, headers={}):
+              req = urllib.request.Request(url, headers={"User-Agent":"Mozilla/5.0", **headers})
+              return json.loads(urllib.request.urlopen(req, timeout=15).read())
 
           def parse_utc(date_str, time_str):
-              if not time_str:
-                  return date_str + "T00:00:00Z"
+              if not time_str: return date_str + "T00:00:00Z"
               m = re.match(r'(\d{2}):(\d{2})\s+UTC([+-]\d+)', time_str)
-              if not m:
-                  return date_str + "T00:00:00Z"
+              if not m: return date_str + "T00:00:00Z"
               h, mn, off = int(m.group(1)), int(m.group(2)), int(m.group(3))
               dt = datetime.datetime.strptime(date_str, "%Y-%m-%d").replace(hour=h, minute=mn)
               return (dt - datetime.timedelta(hours=off)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
+          def norm(n):
+              return API_MAPPING.get(n, n)
+
+          def norm_key(h, a):
+              return h.lower().strip() + "__" + a.lower().strip()
+
+          # ── ETAPE 1: openfootball ────────────────────────────────
           try:
-              url = "https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json"
-              req = urllib.request.Request(url, headers={"User-Agent":"Mozilla/5.0"})
-              raw = json.loads(urllib.request.urlopen(req, timeout=15).read())
+              of = fetch("https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json")
+              matches = of.get("matches", [])
+              print(f"openfootball: {len(matches)} matchs")
           except Exception as e:
-              print(f"openfootball failed: {e}"); exit(0)
+              print(f"openfootball ERREUR: {e}"); exit(0)
 
-          matches = raw.get("matches", [])
-          print(f"openfootball: {len(matches)} matchs")
+          # ── ETAPE 2: API-Football - matchs en cours uniquement ───
+          live_index = {}
+          try:
+              af = fetch(
+                  "https://v3.football.api-sports.io/fixtures?league=1&season=2026&status=1H-HT-2H-ET-P",
+                  {"x-apisports-key": API_FOOTBALL_KEY}
+              )
+              for m in af.get("response", []):
+                  h = norm(m["teams"]["home"]["name"])
+                  a = norm(m["teams"]["away"]["name"])
+                  key = norm_key(h, a)
+                  elapsed = m["fixture"]["status"].get("elapsed", 0) or 0
+                  live_index[key] = {
+                      "status": "in_progress",
+                      "sH": m["goals"]["home"] or 0,
+                      "sA": m["goals"]["away"] or 0,
+                      "elapsed": f"{elapsed}'"
+                  }
+              print(f"API-Football: {len(live_index)} matchs en cours")
+          except Exception as e:
+              print(f"API-Football ERREUR: {e}")
 
+          # ── ETAPE 3: Football-Data - classements ─────────────────
+          standings_fd = {}
+          try:
+              fd = fetch(
+                  "https://api.football-data.org/v4/competitions/WC/standings?season=2026",
+                  {"X-Auth-Token": FOOTBALL_DATA_KEY}
+              )
+              for grp_data in fd.get("standings", []):
+                  if grp_data.get("type") != "TOTAL": continue
+                  grp_raw = grp_data.get("group", "")
+                  grp = grp_raw.replace("GROUP_", "")[:1] if "GROUP_" in grp_raw else ""
+                  if not grp: continue
+                  standings_fd[grp] = []
+                  for t in grp_data["table"]:
+                      name = t["team"]["name"]
+                      abb = ABB.get(name, name[:3].upper())
+                      fr = FR.get(name, name)
+                      standings_fd[grp].append({
+                          "a": abb, "n": fr, "g": grp,
+                          "j": t["playedGames"], "v": t["won"],
+                          "nul": t["draw"], "d": t["lost"],
+                          "pts": t["points"], "r": t["position"]
+                      })
+              print(f"Football-Data: {len(standings_fd)} groupes")
+          except Exception as e:
+              print(f"Football-Data ERREUR: {e}")
+
+          # ── ETAPE 4: Assembler les matchs ────────────────────────
           games = []
           sm = {}
 
           for m in matches:
-              h = m.get("team1")
-              a = m.get("team2")
+              h = m.get("team1", "")
+              a = m.get("team2", "")
               grp_raw = m.get("group", "")
               round_raw = m.get("round", "")
 
-              # Groupe: "Group A" -> "A"
               grp = ""
               if grp_raw and "Group" in grp_raw:
                   g = grp_raw.replace("Group ", "").strip()[:1]
-                  if g.isalpha():
-                      grp = g
+                  if g.isalpha(): grp = g
 
-              # Phase
-              phase = PHASE_FR.get(round_raw, round_raw) if round_raw else ("Groupes" if grp else "")
-
-              # Equipes
-              if not h or not a:
-                  ha, aa, hFR, aFR = "TBD", "TBD", "A determiner", "A determiner"
-              else:
-                  ha = ABB.get(h, h[:3].upper())
-                  aa = ABB.get(a, a[:3].upper())
-                  hFR = FR.get(h, h)
-                  aFR = FR.get(a, a)
-
-              # Heure UTC
+              phase = PHASE_FR.get(round_raw, "Groupes" if grp else round_raw)
+              ha = ABB.get(h, h[:3].upper())
+              aa = ABB.get(a, a[:3].upper())
+              hFR = FR.get(h, h)
+              aFR = FR.get(a, a)
               start = parse_utc(m.get("date", ""), m.get("time", ""))
 
-              # Score et statut
-              score = m.get("score")
-              if score and score.get("ft"):
-                  status = "final"
-                  sH, sA = score["ft"][0], score["ft"][1]
+              # Score openfootball
+              score_of = m.get("score")
+              if score_of and score_of.get("ft"):
+                  of_status = "final"
+                  of_sH, of_sA = score_of["ft"][0], score_of["ft"][1]
               else:
-                  status = "scheduled"
-                  sH, sA = 0, 0
+                  of_status = "scheduled"
+                  of_sH, of_sA = 0, 0
 
-              games.append({"id":str(len(games)+1),"status":status,"start":start,"home":ha,"away":aa,"homeN":hFR,"awayN":aFR,"group":grp,"phase":phase,"scoreH":sH,"scoreA":sA,"elapsed":""})
+              # Enrichir avec API-Football si en cours
+              key = norm_key(h, a)
+              live = live_index.get(key)
 
-              # Classements phase de groupes uniquement
-              if grp and status == "final" and ha != "TBD":
+              if live:
+                  status = live["status"]
+                  sH, sA = live["sH"], live["sA"]
+                  el = live["elapsed"]
+              else:
+                  status = of_status
+                  sH, sA = of_sH, of_sA
+                  el = ""
+
+              games.append({
+                  "id": str(len(games)+1),
+                  "status": status,
+                  "start": start,
+                  "home": ha,
+                  "away": aa,
+                  "homeN": hFR,
+                  "awayN": aFR,
+                  "group": grp,
+                  "phase": phase,
+                  "scoreH": sH,
+                  "scoreA": sA,
+                  "elapsed": el
+              })
+
+              # Classements depuis openfootball si Football-Data absent
+              if grp and grp not in standings_fd and status == "final":
                   if grp not in sm: sm[grp] = {}
                   for t, ab, fn in [(h,ha,hFR),(a,aa,aFR)]:
                       if ab not in sm[grp]:
@@ -91,19 +167,24 @@ jobs:
                   elif sA>sH: sm[grp][aa]["v"]+=1; sm[grp][aa]["pts"]+=3; sm[grp][ha]["d"]+=1
                   else: sm[grp][ha]["nul"]+=1; sm[grp][ha]["pts"]+=1; sm[grp][aa]["nul"]+=1; sm[grp][aa]["pts"]+=1
 
+          # ── ETAPE 5: Assembler classements finaux ────────────────
           st = []
-          for grp in sorted(sm.keys()):
-              ts = sorted(sm[grp].values(), key=lambda x:-x["pts"])
-              for i,t in enumerate(ts):
-                  t["r"]=i+1; st.append(t)
+          all_grps = sorted(set(list(standings_fd.keys()) + list(sm.keys())))
+          for grp in all_grps:
+              if grp in standings_fd:
+                  for t in sorted(standings_fd[grp], key=lambda x: x["r"]):
+                      st.append(t)
+              else:
+                  ts = sorted(sm[grp].values(), key=lambda x: -x["pts"])
+                  for i, t in enumerate(ts):
+                      t["r"] = i+1; st.append(t)
 
           now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-          grp_g = [g for g in games if g["group"]]
-          ko_g = [g for g in games if not g["group"]]
-          out = {"updated":now,"source":"openfootball","games":games,"standings":st}
+          live_count = len([g for g in games if g["status"]=="in_progress"])
+          out = {"updated":now,"source":"openfootball+api-football+football-data","games":games,"standings":st}
           with open("worldcup.json","w",encoding="utf-8") as f:
-              json.dump(out,f,ensure_ascii=False)
-          print(f"OK: {len(grp_g)} groupe + {len(ko_g)} KO, {len(st)} equipes classement")
+              json.dump(out, f, ensure_ascii=False)
+          print(f"OK: {len(games)} matchs, {live_count} en cours, {len(st)} equipes classement")
           EOF
       - run: |
           git config user.name bot
