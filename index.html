@@ -382,22 +382,98 @@ function renderAvenir(){
 // ── TABLEAU ──────────────────────────────────────────────
 function renderTableau(){
   function sep(t,d){return '<div class="psep"><div class="pll"></div><span class="ptt">'+t+'</span><div class="pll"></div></div><div class="pdd">'+d+'</div>';}
-  function tbd(id,d,a,b){return '<div class="tbd"><div class="tbdh"><span>'+id+'</span><span>'+d+'</span></div><div class="tbdt">'+a+'</div><div class="tbdt">'+b+'</div></div>';}
-  var h='<div class="ibox">Phase de groupes en cours &mdash; qualifies connus vers le 2 juillet 2026</div>';
-  h+=sep("16es DE FINALE","3 &mdash; 9 juillet 2026")+'<div class="bg2">';
-  [["M49","3 juil.","1er Grp A","2e Grp B"],["M50","3 juil.","1er Grp C","2e Grp D"],["M51","4 juil.","1er Grp B","2e Grp A"],["M52","4 juil.","1er Grp D","2e Grp C"],["M53","5 juil.","1er Grp E","2e Grp F"],["M54","5 juil.","1er Grp G","2e Grp H"],["M55","6 juil.","1er Grp F","2e Grp E"],["M56","6 juil.","1er Grp H","2e Grp G"],["M57","7 juil.","1er Grp I","2e Grp J"],["M58","7 juil.","1er Grp K","2e Grp L"],["M59","7 juil.","1er Grp J","2e Grp I"],["M60","7 juil.","1er Grp L","2e Grp K"],["M61","8 juil.","Meilleur 3e","Meilleur 3e"],["M62","8 juil.","Meilleur 3e","Meilleur 3e"],["M63","9 juil.","Meilleur 3e","Meilleur 3e"],["M64","9 juil.","Meilleur 3e","Meilleur 3e"]].forEach(function(m){h+=tbd(m[0],m[1],m[2],m[3]);});
-  h+='</div>';
-  h+=sep("8es DE FINALE","11 &mdash; 14 juillet 2026")+'<div class="bg2">';
-  [["QF1","11 juil.","Vainqueur M49","Vainqueur M50"],["QF2","11 juil.","Vainqueur M51","Vainqueur M52"],["QF3","12 juil.","Vainqueur M53","Vainqueur M54"],["QF4","12 juil.","Vainqueur M55","Vainqueur M56"],["QF5","13 juil.","Vainqueur M57","Vainqueur M58"],["QF6","13 juil.","Vainqueur M59","Vainqueur M60"],["QF7","14 juil.","Vainqueur M61","Vainqueur M62"],["QF8","14 juil.","Vainqueur M63","Vainqueur M64"]].forEach(function(m){h+=tbd(m[0],m[1],m[2],m[3]);});
-  h+='</div>';
-  h+=sep("QUARTS DE FINALE","17 &mdash; 19 juillet 2026")+'<div class="bg2">';
-  [["1/4 A","17 juil.","Vainqueur QF1","Vainqueur QF2"],["1/4 B","18 juil.","Vainqueur QF3","Vainqueur QF4"],["1/4 C","18 juil.","Vainqueur QF5","Vainqueur QF6"],["1/4 D","19 juil.","Vainqueur QF7","Vainqueur QF8"]].forEach(function(m){h+=tbd(m[0],m[1],m[2],m[3]);});
-  h+='</div>';
-  h+=sep("DEMI-FINALES","22 &mdash; 23 juillet 2026")+'<div class="bg2">'+tbd("1/2 A","22 juil.","Vainqueur 1/4 A","Vainqueur 1/4 B")+tbd("1/2 B","23 juil.","Vainqueur 1/4 C","Vainqueur 1/4 D")+'</div>';
-  h+=sep("PETITE FINALE","25 juillet 2026 &mdash; Miami")+'<div class="fw">'+tbd("3e place","25 juil.","Perdant 1/2 A","Perdant 1/2 B")+'</div>';
+
+  function fmtTeam(name){
+    if(!name)return "A determiner";
+    // Vrai nom
+    if(name.length>3&&!/^[12W3L]/.test(name))return name;
+    // "1I" ou "2G" -> "1er/2e Grp X"
+    if(name.length===2&&/^[12]/.test(name)&&/[A-L]$/.test(name)){
+      return (name[0]==="1"?"1er":"2e")+" Grp "+name[1];
+    }
+    // "3A/B/C" -> "3e Grp A/B/C"
+    if(/^3[A-L]/.test(name)){
+      var grps=name.slice(1).replace(/\/$/,"");
+      return "3e Grp "+grps;
+    }
+    // "W74" -> "Vainqueur M74"
+    if(/^W\d+$/.test(name))return "Vainqueur M"+name.slice(1);
+    // "L101" -> "Perdant M101"
+    if(/^L\d+$/.test(name))return "Perdant M"+name.slice(1);
+    return name;
+  }
+
+  function fmtD(iso){
+    try{
+      var dt=new Date(iso);
+      return dt.toLocaleDateString("fr-BE",{day:"2-digit",month:"2-digit",timeZone:"Europe/Brussels"});
+    }catch(e){return "";}
+  }
+
+  function matchCard(m){
+    var hN=fmtTeam(m.homeN||m.home);
+    var aN=fmtTeam(m.awayN||m.away);
+    var hF=m.home&&FL[m.home]?fl(m.home):"";
+    var aF=m.away&&FL[m.away]?fl(m.away):"";
+    var d=fmtD(m.start);
+    var score=m.status==="final"?
+      '<span style="color:var(--gold);font-family:Bebas Neue,sans-serif;font-size:1.1rem">'+m.scoreH+" - "+m.scoreA+'</span>':
+      '<span style="color:var(--grey);font-size:.7rem">'+d+'</span>';
+    var known=m.status==="final";
+    return '<div class="tbd"'+(known?' style="opacity:1;border-color:rgba(232,184,75,.4)"':'')+'>'+
+      '<div class="tbdh"><span>M'+m.id+'</span>'+score+'</div>'+
+      '<div class="tbdt">'+hF+' '+hN+'</div>'+
+      '<div class="tbdt">'+aF+' '+aN+'</div></div>';
+  }
+
+  // Lire les matchs depuis allM
+  var ko16=allM.filter(function(m){return m.phase==="16es de finale";}).sort(function(a,b){return new Date(a.start)-new Date(b.start);});
+  var ko8=allM.filter(function(m){return m.phase==="8es de finale";}).sort(function(a,b){return new Date(a.start)-new Date(b.start);});
+  var koQF=allM.filter(function(m){return m.phase==="Quarter-final"||m.phase==="Quarts de finale";}).sort(function(a,b){return new Date(a.start)-new Date(b.start);});
+  var koSF=allM.filter(function(m){return m.phase==="Semi-final"||m.phase==="Demi-finales";}).sort(function(a,b){return new Date(a.start)-new Date(b.start);});
+  var ko3P=allM.filter(function(m){return m.phase==="Match for third place"||m.phase==="Petite finale";});
+  var koF=allM.filter(function(m){return m.phase==="Finale";});
+
+  var h="";
+
+  // Phase de groupes encore en cours?
+  var grpLeft=allM.filter(function(m){return m.group&&m.status==="scheduled";}).length;
+  if(grpLeft>0){
+    h+='<div class="ibox">'+grpLeft+' matchs de groupe restants &mdash; tableau en cours de constitution</div>';
+  }
+
+  if(ko16.length){
+    h+=sep("16es DE FINALE","28 juin &mdash; 4 juillet 2026")+'<div class="bg2">';
+    ko16.forEach(function(m){h+=matchCard(m);});
+    h+='</div>';
+  }
+  if(ko8.length){
+    h+=sep("8es DE FINALE","4 &mdash; 7 juillet 2026")+'<div class="bg2">';
+    ko8.forEach(function(m){h+=matchCard(m);});
+    h+='</div>';
+  }
+  if(koQF.length){
+    h+=sep("QUARTS DE FINALE","9 &mdash; 12 juillet 2026")+'<div class="bg2">';
+    koQF.forEach(function(m){h+=matchCard(m);});
+    h+='</div>';
+  }
+  if(koSF.length){
+    h+=sep("DEMI-FINALES","14 &mdash; 15 juillet 2026")+'<div class="bg2">';
+    koSF.forEach(function(m){h+=matchCard(m);});
+    h+='</div>';
+  }
+  if(ko3P.length){
+    h+=sep("PETITE FINALE","18 juillet 2026")+'<div class="fw">';
+    ko3P.forEach(function(m){h+=matchCard(m);});
+    h+='</div>';
+  }
   h+='<div class="fsep"><div class="fsl"></div><span class="fsb">FINALE</span><div class="fsl"></div></div>';
   h+='<div class="fi">19 JUILLET 2026 &middot; METLIFE STADIUM NEW YORK &middot; 19h CEST</div>';
-  h+='<div class="fw"><div class="fcard"><div class="fhd"><span>FINALE MONDIALE</span><span>19 juil. 19h</span></div><div class="ftt">Vainqueur 1/2 A</div><div class="ftt">Vainqueur 1/2 B</div></div></div>';
+  if(koF.length){
+    h+='<div class="fw">'+matchCard(koF[0])+'</div>';
+  }else{
+    h+='<div class="fw"><div class="fcard"><div class="fhd"><span>FINALE MONDIALE</span><span>19 juil. 19h</span></div><div class="ftt">A determiner</div><div class="ftt">A determiner</div></div></div>';
+  }
   h+='<div class="trophy">&#127942;</div>';
   document.getElementById("tableau").innerHTML=h;
 }
