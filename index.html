@@ -213,7 +213,7 @@ function loadData(){
       var src=data.source||"";
       var live=allM.filter(function(m){return m.status==="in_progress";});
       // Si matchs en cours, appel direct API-Football pour minutes a jour
-      var livePromise=live.length>0?updateLiveScores():Promise.resolve(false);
+      var livePromise=updateLiveScores(); // Toujours appeler pour detecter matchs en cours
       return livePromise.then(function(){
         var now=new Date();
         info.textContent="Mis a jour "+now.toLocaleTimeString("fr-BE",{hour:"2-digit",minute:"2-digit"});
@@ -259,7 +259,7 @@ function renderTab(id){
 function renderAccueil(){
   var live=allM.filter(function(m){return m.status==="in_progress";});
   var fin=allM.filter(function(m){return m.status==="final";}).sort(function(a,b){return new Date(b.start)-new Date(a.start);});
-  var up=allM.filter(function(m){return m.status==="scheduled";}).sort(function(a,b){return new Date(a.start)-new Date(b.start);}).slice(0,4);
+  var up=allM.filter(function(m){return m.status==="scheduled"&&m.group;}).sort(function(a,b){return new Date(a.start)-new Date(b.start);}).slice(0,4);
   var belG=allS.filter(function(t){return t.g==="G";});
   var h="";
 
@@ -355,26 +355,50 @@ function renderGroupes(filter){
 function ugb(b){document.querySelectorAll(".gb").forEach(function(x){x.classList.remove("active");});b.classList.add("active");}
 
 // ── A VENIR ──────────────────────────────────────────────
+function fmtTeamAvenir(name){
+  if(!name)return "A determiner";
+  if(name.length>3&&!/^[12W3L]/.test(name))return name;
+  if(name.length===2&&/^[12]/.test(name)&&/[A-L]$/.test(name)){
+    return (name[0]==="1"?"1er":"2e")+" Grp "+name[1];
+  }
+  if(/^3[A-L]/.test(name)){return "3e Grp "+name.slice(1).replace(/\/$/,"");}
+  if(/^W\d+$/.test(name))return "Vainqueur M"+name.slice(1);
+  if(/^L\d+$/.test(name))return "Perdant M"+name.slice(1);
+  return name;
+}
 function renderAvenir(){
-  var up=allM.filter(function(m){return m.status==="scheduled";}).sort(function(a,b){return new Date(a.start)-new Date(b.start);});
-  var bd={};
-  up.forEach(function(m){var d=fmtDL(m.start);if(!bd[d])bd[d]=[];bd[d].push(m);});
+  var all=allM.filter(function(m){return m.status==="scheduled";}).sort(function(a,b){return new Date(a.start)-new Date(b.start);});
+  var grpM=all.filter(function(m){return !!m.group;});
+  var koM=all.filter(function(m){return !m.group;});
   var h="";
-  Object.entries(bd).forEach(function(e){
-    h+='<div class="dsep">'+e[0]+'</div><div class="card">';
-    e[1].forEach(function(m){
-      var label=m.group?"Grp "+m.group:(m.phase||"");
-      h+='<div class="upm"><div class="upi">';
-      h+='<div class="upt"><div class="un">'+fl(m.home)+' '+fn(m.homeN||m.home)+'</div>';
-      if(m.probH){h+='<div class="pb"><div class="pf" style="width:'+m.probH+'%"></div></div>';h+='<div class="pp">'+m.probH+'%</div>';}
+  function renderSection(list){
+    var bd={};
+    list.forEach(function(m){var d=fmtDL(m.start);if(!bd[d])bd[d]=[];bd[d].push(m);});
+    Object.entries(bd).forEach(function(e){
+      h+='<div class="dsep">'+e[0]+'</div><div class="card">';
+      e[1].forEach(function(m){
+        var label=m.group?"Grp "+m.group:(m.phase||"");
+        var hN=m.group?fn(m.homeN||m.home):fmtTeamAvenir(m.homeN||m.home);
+        var aN=m.group?fn(m.awayN||m.away):fmtTeamAvenir(m.awayN||m.away);
+        var hFlag=m.group||FL[m.home]?fl(m.home):"";
+        var aFlag=m.group||FL[m.away]?fl(m.away):"";
+        h+='<div class="upm"><div class="upi">';
+        h+='<div class="upt"><div class="un">'+hFlag+' '+hN+'</div>';
+        if(m.probH){h+='<div class="pb"><div class="pf" style="width:'+m.probH+'%"></div></div>';h+='<div class="pp">'+m.probH+'%</div>';}
+        h+='</div>';
+        h+='<div class="upc"><div class="ucg">'+label+'</div><div class="uch">'+fmtH(m.start)+'</div><div class="ucd">'+fmtD(m.start)+'</div></div>';
+        h+='<div class="upt r"><div class="un">'+aN+' '+aFlag+'</div>';
+        if(m.probA){h+='<div class="pb" style="direction:rtl"><div class="pf" style="width:'+m.probA+'%"></div></div>';h+='<div class="pp r">'+m.probA+'%</div>';}
+        h+='</div></div></div>';
+      });
       h+='</div>';
-      h+='<div class="upc"><div class="ucg">'+label+'</div><div class="uch">'+fmtH(m.start)+'</div><div class="ucd">'+fmtD(m.start)+'</div></div>';
-      h+='<div class="upt r"><div class="un">'+fn(m.awayN||m.away)+' '+fl(m.away)+'</div>';
-      if(m.probA){h+='<div class="pb" style="direction:rtl"><div class="pf" style="width:'+m.probA+'%"></div></div>';h+='<div class="pp r">'+m.probA+'%</div>';}
-      h+='</div></div></div>';
     });
-    h+='</div>';
-  });
+  }
+  renderSection(grpM);
+  if(koM.length){
+    h+='<div class="dsep" style="color:var(--gold)">Phase eliminatoire</div>';
+    renderSection(koM);
+  }
   if(!h)h='<div style="padding:30px;text-align:center;color:var(--grey)">Aucun match programme</div>';
   document.getElementById("avenir").innerHTML=h;
 }
