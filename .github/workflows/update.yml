@@ -81,13 +81,19 @@ jobs:
                   "https://api.football-data.org/v4/competitions/WC/standings?season=2026",
                   {"X-Auth-Token": FOOTBALL_DATA_KEY}
               )
-              for grp_data in fd.get("standings", []) or []:
-                  if grp_data.get("type") != "TOTAL": continue
+              # Debug: afficher les cles de la reponse
+              print(f"Football-Data reponse cles: {list(fd.keys()) if fd else 'None'}")
+              raw_standings = fd.get("standings") if fd else None
+              print(f"Football-Data standings type: {type(raw_standings)} len: {len(raw_standings) if raw_standings else 0}")
+              for grp_data in raw_standings or []:
+                  grp_type = grp_data.get("type","")
                   grp_raw = grp_data.get("group", "")
+                  print(f"  grp_data type={grp_type} group={grp_raw}")
+                  if grp_type != "TOTAL": continue
                   grp = grp_raw.replace("GROUP_", "")[:1] if "GROUP_" in grp_raw else ""
                   if not grp: continue
                   standings_fd[grp] = []
-                  for t in grp_data["table"]:
+                  for t in grp_data.get("table", []):
                       name = t["team"]["name"]
                       abb = ABB.get(name, name[:3].upper())
                       fr = FR.get(name, name)
@@ -194,4 +200,4 @@ jobs:
           git config user.name bot
           git config user.email bot@bot.com
           git add worldcup.json
-          git diff --staged --quiet || (git commit -m "update $(date -u +%H:%M)" && git push)
+          git diff --staged --quiet || (git commit -m "update $(date -u +%H:%M)" && git pull --rebase && git push)
