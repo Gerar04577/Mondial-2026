@@ -37,8 +37,30 @@ jobs:
           def norm_key(h, a): return h.lower().strip() + "__" + a.lower().strip()
 
           now_utc = datetime.datetime.now(datetime.timezone.utc)
-          # Appeler fixtures et standings 1x/heure (minutes == 0 ou 5)
-          call_full = now_utc.minute < 10
+
+          # Lire worldcup.json actuel pour verifier si des matchs scheduled ont commence
+          import os
+          need_ft_update = False
+          try:
+              if os.path.exists("worldcup.json"):
+                  with open("worldcup.json") as wf:
+                      current = json.load(wf)
+                  for g in current.get("games", []):
+                      if g.get("status") == "scheduled" and g.get("start"):
+                          try:
+                              dt = datetime.datetime.strptime(g["start"][:19], "%Y-%m-%dT%H:%M:%S")
+                              dt = dt.replace(tzinfo=datetime.timezone.utc)
+                              diff = (now_utc - dt).total_seconds() / 60
+                              # Match aurait du commencer il y a entre 5 et 150 min
+                              if 5 <= diff <= 150:
+                                  need_ft_update = True
+                                  break
+                          except:
+                              pass
+          except:
+              pass
+
+          call_full = need_ft_update or now_utc.minute < 10
 
           # ── ETAPE 1: openfootball - heures UTC ──────────────────
           try:
