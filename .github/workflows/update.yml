@@ -1,0 +1,210 @@
+name: Update
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          python3 - << 'EOF'
+          import json, urllib.request, datetime, re
+
+          API_KEY = "8007e7f96b5c5c2c6ac35fa56c77a33e"
+
+          ABB={"Mexico":"MEX","South Africa":"RSA","South Korea":"KOR","Czech Republic":"CZE","Canada":"CAN","Switzerland":"SUI","Bosnia-Herzegovina":"BIH","Qatar":"QAT","Brazil":"BRA","Morocco":"MAR","Scotland":"SCO","Haiti":"HTI","United States":"USA","Australia":"AUS","Paraguay":"PAR","Turkey":"TUR","Germany":"GER","Ivory Coast":"CIV","Ecuador":"ECU","Curacao":"CUW","Netherlands":"NED","Japan":"JPN","Sweden":"SWE","Tunisia":"TUN","Egypt":"EGY","Iran":"IRN","IR Iran":"IRN","Belgium":"BEL","New Zealand":"NZL","Spain":"ESP","Uruguay":"URU","Cape Verde":"CPV","Saudi Arabia":"KSA","France":"FRA","Norway":"NOR","Senegal":"SEN","Iraq":"IRQ","Argentina":"ARG","Austria":"AUT","Algeria":"DZA","Jordan":"JOR","Colombia":"COL","Portugal":"POR","DR Congo":"COD","Uzbekistan":"UZB","England":"ENG","Ghana":"GHA","Croatia":"CRO","Panama":"PAN"}
+          FR={"Mexico":"Mexique","South Africa":"Afr. Sud","South Korea":"Coree S.","Czech Republic":"Tcheque","Canada":"Canada","Switzerland":"Suisse","Bosnia-Herzegovina":"Bosnie","Qatar":"Qatar","Brazil":"Bresil","Morocco":"Maroc","Scotland":"Ecosse","Haiti":"Haiti","United States":"Etats-Unis","Australia":"Australie","Paraguay":"Paraguay","Turkey":"Turquie","Germany":"Allemagne","Ivory Coast":"Cote Ivoire","Ecuador":"Equateur","Curacao":"Curacao","Netherlands":"Pays-Bas","Japan":"Japon","Sweden":"Suede","Tunisia":"Tunisie","Egypt":"Egypte","Iran":"Iran","IR Iran":"Iran","Belgium":"Belgique","New Zealand":"N-Zelande","Spain":"Espagne","Uruguay":"Uruguay","Cape Verde":"Cap-Vert","Saudi Arabia":"Arabie Sao.","France":"France","Norway":"Norvege","Senegal":"Senegal","Iraq":"Iraq","Argentina":"Argentine","Austria":"Autriche","Algeria":"Algerie","Jordan":"Jordanie","Colombia":"Colombie","Portugal":"Portugal","DR Congo":"Congo RD","Uzbekistan":"Ouzbekistan","England":"Angleterre","Ghana":"Ghana","Croatia":"Croatie","Panama":"Panama"}
+          PHASE_FR={"Round of 32":"16es de finale","Round of 16":"8es de finale","Quarterfinals":"Quarts de finale","Semifinals":"Demi-finales","Third place":"Petite finale","Final":"Finale"}
+          API_MAPPING={"Bosnia and Herzegovina":"Bosnia-Herzegovina","Korea Republic":"South Korea","Turkiye":"Turkey","Cote d'Ivoire":"Ivory Coast","IR Iran":"Iran","New Zealand":"New Zealand","DR Congo":"DR Congo"}
+
+          def fetch(url, headers={}):
+              req = urllib.request.Request(url, headers={"User-Agent":"Mozilla/5.0", **headers})
+              return json.loads(urllib.request.urlopen(req, timeout=15).read())
+
+          def parse_utc(date_str, time_str):
+              if not time_str: return date_str + "T00:00:00Z"
+              m = re.match(r'(\d{2}):(\d{2})\s+UTC([+-]\d+)', time_str)
+              if not m: return date_str + "T00:00:00Z"
+              h, mn, off = int(m.group(1)), int(m.group(2)), int(m.group(3))
+              dt = datetime.datetime.strptime(date_str, "%Y-%m-%d").replace(hour=h, minute=mn)
+              return (dt - datetime.timedelta(hours=off)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+          def norm(n): return API_MAPPING.get(n, n)
+          def norm_key(h, a): return h.lower().strip() + "__" + a.lower().strip()
+
+          now_utc = datetime.datetime.now(datetime.timezone.utc)
+
+          # Lire worldcup.json actuel pour verifier si des matchs scheduled ont commence
+          import os
+          need_ft_update = False
+          try:
+              if os.path.exists("worldcup.json"):
+                  with open("worldcup.json") as wf:
+                      current = json.load(wf)
+                  for g in current.get("games", []):
+                      if g.get("status") == "scheduled" and g.get("start"):
+                          try:
+                              dt = datetime.datetime.strptime(g["start"][:19], "%Y-%m-%dT%H:%M:%S")
+                              dt = dt.replace(tzinfo=datetime.timezone.utc)
+                              diff = (now_utc - dt).total_seconds() / 60
+                              # Match aurait du commencer il y a entre 5 et 150 min
+                              if 5 <= diff <= 150:
+                                  need_ft_update = True
+                                  break
+                          except:
+                              pass
+          except:
+              pass
+
+          call_full = need_ft_update or now_utc.minute < 10
+
+          # ── ETAPE 1: openfootball - heures UTC ──────────────────
+          try:
+              of = fetch("https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json")
+              matches = of.get("matches", [])
+              print(f"openfootball: {len(matches)} matchs")
+          except Exception as e:
+              print(f"openfootball ERREUR: {e}"); exit(0)
+
+          # ── ETAPE 2: API-Football - matchs termines (1x/heure) ──
+          af_index = {}
+          if call_full:
+              try:
+                  af = fetch(
+                      "https://v3.football.api-sports.io/fixtures?league=1&season=2026&status=FT-AET-PEN",
+                      {"x-apisports-key": API_KEY}
+                  )
+                  for m in af.get("response", []):
+                      if m["league"]["id"]!=1 or m["league"]["season"]!=2026: continue
+                      h = norm(m["teams"]["home"]["name"])
+                      a = norm(m["teams"]["away"]["name"])
+                      key = norm_key(h, a)
+                      af_index[key] = {"status":"final","sH":m["goals"]["home"] or 0,"sA":m["goals"]["away"] or 0,"elapsed":""}
+                  print(f"API-Football FT: {len(af_index)} matchs termines")
+              except Exception as e:
+                  print(f"API-Football FT ERREUR: {e}")
+
+          # ── ETAPE 3: API-Football - matchs en cours (toujours) ──
+          live_index = {}
+          try:
+              af_live = fetch(
+                  "https://v3.football.api-sports.io/fixtures?live=all",
+                  {"x-apisports-key": API_KEY}
+              )
+              for m in af_live.get("response", []):
+                  if m["league"]["id"]!=1 or m["league"]["season"]!=2026: continue
+                  h = norm(m["teams"]["home"]["name"])
+                  a = norm(m["teams"]["away"]["name"])
+                  key = norm_key(h, a)
+                  elapsed = m["fixture"]["status"].get("elapsed",0) or 0
+                  live_index[key] = {"status":"in_progress","sH":m["goals"]["home"] or 0,"sA":m["goals"]["away"] or 0,"elapsed":f"{elapsed}'"}
+              print(f"API-Football LIVE: {len(live_index)} matchs en cours")
+          except Exception as e:
+              print(f"API-Football LIVE ERREUR: {e}")
+
+          # ── ETAPE 4: API-Football - classements (1x/heure) ──────
+          standings_af = {}
+          if call_full:
+              try:
+                  af_st = fetch(
+                      "https://v3.football.api-sports.io/standings?league=1&season=2026",
+                      {"x-apisports-key": API_KEY}
+                  )
+                  for entry in af_st.get("response", []):
+                      for group_table in entry.get("league", {}).get("standings", []):
+                          for t in group_table:
+                              grp_raw = t.get("group","") or ""
+                              grp = grp_raw.replace("Group ","").strip()[:1] if "Group " in grp_raw else ""
+                              if not grp or not grp.isalpha(): continue
+                              name = t["team"]["name"]
+                              abb = ABB.get(name, name[:3].upper())
+                              fr = FR.get(name, name)
+                              if grp not in standings_af: standings_af[grp] = []
+                              standings_af[grp].append({
+                                  "a":abb,"n":fr,"g":grp,
+                                  "j":t["all"]["played"],"v":t["all"]["win"],
+                                  "nul":t["all"]["draw"],"d":t["all"]["lose"],
+                                  "pts":t["points"],"r":t["rank"]
+                              })
+                  print(f"API-Football standings: {len(standings_af)} groupes")
+              except Exception as e:
+                  print(f"API-Football standings ERREUR: {e}")
+
+          # ── ETAPE 5: Assembler les matchs ────────────────────────
+          games = []
+          sm = {}
+
+          for m in matches:
+              h = m.get("team1","")
+              a = m.get("team2","")
+              grp_raw = m.get("group","")
+              round_raw = m.get("round","")
+
+              grp = ""
+              if grp_raw and "Group" in grp_raw:
+                  g = grp_raw.replace("Group ","").strip()[:1]
+                  if g.isalpha(): grp = g
+
+              phase = PHASE_FR.get(round_raw, "Groupes" if grp else round_raw)
+              ha = ABB.get(h, h[:3].upper())
+              aa = ABB.get(a, a[:3].upper())
+              hFR = FR.get(h, h)
+              aFR = FR.get(a, a)
+              start = parse_utc(m.get("date",""), m.get("time",""))
+
+              key = norm_key(h, a)
+
+              # Priorite: live > FT > openfootball
+              if key in live_index:
+                  d = live_index[key]
+                  status, sH, sA, el = d["status"], d["sH"], d["sA"], d["elapsed"]
+              elif key in af_index:
+                  d = af_index[key]
+                  status, sH, sA, el = d["status"], d["sH"], d["sA"], ""
+              else:
+                  score_of = m.get("score")
+                  if score_of and score_of.get("ft"):
+                      status, sH, sA, el = "final", score_of["ft"][0], score_of["ft"][1], ""
+                  else:
+                      status, sH, sA, el = "scheduled", 0, 0, ""
+
+              games.append({"id":str(len(games)+1),"status":status,"start":start,"home":ha,"away":aa,"homeN":hFR,"awayN":aFR,"group":grp,"phase":phase,"scoreH":sH,"scoreA":sA,"elapsed":el})
+
+              # Classements fallback depuis openfootball
+              if grp and grp not in standings_af and status=="final":
+                  if grp not in sm: sm[grp] = {}
+                  for t,ab,fn in [(h,ha,hFR),(a,aa,aFR)]:
+                      if ab not in sm[grp]:
+                          sm[grp][ab]={"a":ab,"n":fn,"g":grp,"j":0,"v":0,"nul":0,"d":0,"pts":0}
+                  sm[grp][ha]["j"]+=1; sm[grp][aa]["j"]+=1
+                  if sH>sA: sm[grp][ha]["v"]+=1; sm[grp][ha]["pts"]+=3; sm[grp][aa]["d"]+=1
+                  elif sA>sH: sm[grp][aa]["v"]+=1; sm[grp][aa]["pts"]+=3; sm[grp][ha]["d"]+=1
+                  else: sm[grp][ha]["nul"]+=1; sm[grp][ha]["pts"]+=1; sm[grp][aa]["nul"]+=1; sm[grp][aa]["pts"]+=1
+
+          # ── ETAPE 6: Classements finaux ──────────────────────────
+          st = []
+          all_grps = sorted(set(list(standings_af.keys()) + list(sm.keys())))
+          for grp in all_grps:
+              if grp in standings_af:
+                  for t in sorted(standings_af[grp], key=lambda x: x["r"]):
+                      st.append(t)
+              else:
+                  for i,t in enumerate(sorted(sm[grp].values(), key=lambda x:-x["pts"])):
+                      t["r"]=i+1; st.append(t)
+
+          now_s = now_utc.strftime("%Y-%m-%dT%H:%M:%SZ")
+          live_count = len([g for g in games if g["status"]=="in_progress"])
+          out = {"updated":now_s,"source":"openfootball+api-football","games":games,"standings":st}
+          with open("worldcup.json","w",encoding="utf-8") as f:
+              json.dump(out, f, ensure_ascii=False)
+          print(f"OK: {len(games)} matchs, {live_count} en cours, {len(st)} equipes classement")
+          EOF
+      - run: |
+          git config user.name bot
+          git config user.email bot@bot.com
+          git add worldcup.json
+          git diff --staged --quiet || (git commit -m "update $(date -u +%H:%M)" && git pull --rebase && git push)
