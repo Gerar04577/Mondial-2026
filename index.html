@@ -222,12 +222,12 @@ function loadData(){
       // Si matchs en cours, appel direct API-Football pour minutes a jour
       var livePromise=updateLiveScores();
       return livePromise.then(function(afCount){
-        if(afCount!==undefined){
-          info.textContent+=" | AF: "+(afCount===null?"erreur":afCount+" live");
-        }
         var now=new Date();
         info.textContent="Mis a jour "+now.toLocaleTimeString("fr-BE",{hour:"2-digit",minute:"2-digit"});
         if(src)info.textContent+=" ("+src+")";
+        if(afCount!==undefined){
+          info.textContent+=" | AF: "+(afCount===null?"erreur":afCount+" live");
+        }
         var liveNow=allM.filter(function(m){return m.status==="in_progress";});
         var lind=document.getElementById("liveind");
         if(liveNow.length>0){
