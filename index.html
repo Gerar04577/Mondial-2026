@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mondial 2026">
+<title>Mondial 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a3d1f;color:#f5f5f0;font-family:Inter,sans-serif;min-height:100vh}
+:root{--gold:#e8b84b;--grey:#a8a89e;--card:#0f1a0f;--card2:#141f14;--red:#e84b4b;--green:#4be87a;--bel:#ed2939;--live:#ff4444}
+.header{background:linear-gradient(135deg,#000 0%,#0a3d1f 60%,#0d5229 100%);border-bottom:2px solid var(--gold);position:sticky;top:0;z-index:100}
+.htop{text-align:center;padding:12px 12px 6px}
+h1{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:4px;color:var(--gold);line-height:1}
+.sub{color:var(--grey);font-size:.62rem;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.ubar{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:5px;flex-wrap:wrap}
+.uinfo{font-size:.6rem;color:var(--grey)}
+.live-indicator{display:inline-flex;align-items:center;gap:4px;background:rgba(255,68,68,.15);border:1px solid rgba(255,68,68,.4);border-radius:12px;padding:2px 8px;font-size:.62rem;color:var(--live);font-weight:700}
+.live-dot{width:6px;height:6px;background:var(--live);border-radius:50%;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btnr{background:rgba(232,184,75,.15);border:1px solid rgba(232,184,75,.5);border-radius:20px;padding:4px 12px;color:var(--gold);font-size:.7rem;font-weight:600;cursor:pointer}
+.btnr:disabled{opacity:.5}
+.spinning{animation:spin 1s linear infinite;display:inline-block}
+.tabs{display:flex;overflow-x:auto;border-top:1px solid rgba(232,184,75,.15)}
+.tab{flex:0 0 auto;padding:9px 13px;border:none;background:transparent;color:var(--grey);border-bottom:3px solid transparent;font-weight:600;font-size:.7rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;white-space:nowrap}
+.tab.active{color:var(--gold);border-bottom:3px solid var(--gold)}
+.main{max-width:700px;margin:0 auto;padding:0 12px 60px}
+.section{display:none}.section.active{display:block}
+.card{background:var(--card);border:1px solid rgba(232,184,75,.15);border-radius:10px;margin-bottom:12px;overflow:hidden}
+.card.bel{border-color:rgba(237,41,57,.5)}
+.ct{background:var(--card2);padding:7px 14px;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;color:var(--gold);border-bottom:1px solid rgba(232,184,75,.1)}
+.ct.bel{color:var(--bel)}
+/* LIVE CARD */
+.live-card{background:var(--card);border:2px solid rgba(255,68,68,.5);border-radius:10px;margin-bottom:12px;overflow:hidden;animation:liveglow 2s ease-in-out infinite}
+@keyframes liveglow{0%,100%{box-shadow:0 0 0 0 rgba(255,68,68,0)}50%{box-shadow:0 0 12px 2px rgba(255,68,68,.2)}}
+.live-ct{background:rgba(255,68,68,.15);padding:7px 14px;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;color:var(--live);border-bottom:1px solid rgba(255,68,68,.2);display:flex;align-items:center;gap:8px}
+.live-match{padding:14px;display:flex;align-items:center;gap:8px}
+.lm-team{flex:1;font-weight:700;font-size:1rem}
+.lm-team.r{text-align:right}
+.lm-score{text-align:center;min-width:90px}
+.lm-sv{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold);letter-spacing:3px;display:block}
+.lm-elapsed{font-size:.7rem;color:var(--live);font-weight:600;margin-top:2px}
+/* MATCH ROW */
+.match{display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.05)}
+.match:last-child{border-bottom:none}
+.match.bm{background:rgba(237,41,57,.05);border-left:3px solid var(--bel)}
+.match:not(.bm){border-left:3px solid transparent}
+.mh,.ma{flex:1;font-weight:500;font-size:.85rem}
+.ma{text-align:right}
+.mh.w,.ma.w{font-weight:700}.mh.l,.ma.l{opacity:.5}
+.ms{min-width:76px;text-align:center}
+.sv{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--gold);letter-spacing:2px}
+.vs{color:var(--grey);font-size:.7rem;font-weight:600}
+.mt{min-width:72px;text-align:right;margin-left:8px}
+.mg{font-size:.6rem;color:var(--grey)}
+.mhr{font-size:.82rem;font-weight:600;color:#f5f5f0}
+/* STANDINGS */
+.standings{width:100%;border-collapse:collapse;font-size:.82rem}
+.standings thead tr{background:var(--card2);color:var(--grey);font-size:.6rem;text-transform:uppercase}
+.standings th{padding:6px 4px;text-align:center}
+.standings th:first-child{padding:6px 10px;text-align:left}
+.standings td{padding:8px 4px;text-align:center;border-bottom:1px solid rgba(255,255,255,.05)}
+.standings td:first-child{padding:8px 10px;text-align:left;font-weight:600}
+.standings tr.br{background:rgba(237,41,57,.08)}
+.standings tr.br td:first-child{color:var(--bel)}
+.rb{display:inline-flex;width:18px;height:18px;align-items:center;justify-content:center;border-radius:50%;font-size:.62rem;font-weight:700;margin-right:6px}
+.r1{background:var(--gold);color:#000}.r2{background:rgba(232,184,75,.3);color:var(--gold)}.r3,.r4{background:rgba(255,255,255,.1);color:var(--grey)}
+.vc{color:var(--green)}.dc{color:var(--red)}.pc{color:var(--gold);font-weight:700;font-size:.95rem}
+/* GROUPES FILTER */
+.gnav{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 10px}
+.gb{padding:4px 11px;border-radius:20px;border:1px solid rgba(232,184,75,.3);background:transparent;color:var(--grey);font-size:.7rem;font-weight:600;cursor:pointer}
+.gb.active{background:var(--gold);color:#000;border-color:var(--gold)}
+/* DATE SEP */
+.dsep{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:3px;color:var(--grey);padding:14px 0 6px;text-transform:uppercase}
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}
+.stat{background:var(--card);border:1px solid rgba(232,184,75,.15);border-radius:10px;padding:10px 6px;text-align:center}
+.sn{font-family:'Bebas Neue',sans-serif;font-size:1.9rem;color:var(--gold);line-height:1}
+.sl{font-size:.58rem;color:var(--grey);text-transform:uppercase;letter-spacing:1px;margin-top:3px}
+/* UPCOMING */
+.upm{padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.05)}
+.upm:last-child{border-bottom:none}
+.upi{display:flex;align-items:center;gap:8px}
+.upt{flex:1}.upt.r{text-align:right}
+.un{font-weight:600;font-size:.85rem}
+.pb{height:3px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:4px;overflow:hidden}
+.pf{height:100%;background:var(--gold);border-radius:2px}
+.pp{font-size:.62rem;color:var(--grey);margin-top:2px}
+.pp.r{text-align:right}
+.upc{text-align:center;min-width:64px}
+.ucg{font-size:.58rem;color:var(--grey)}
+.uch{font-weight:700;color:#f5f5f0;font-size:.88rem}
+.ucd{font-size:.6rem;color:var(--grey)}
+/* TABLEAU */
+.ibox{background:rgba(232,184,75,.08);border:1px solid rgba(232,184,75,.2);border-radius:8px;padding:9px 14px;margin:14px 0;font-size:.76rem;color:var(--grey);text-align:center}
+.psep{display:flex;align-items:center;gap:10px;padding:16px 0 5px}
+.pll{flex:1;height:1px;background:rgba(232,184,75,.2)}
+.ptt{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:3px;color:var(--gold)}
+.pdd{font-size:.63rem;color:var(--grey);text-align:center;letter-spacing:1px;margin-bottom:10px}
+.bg2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:4px}
+.tbd{background:var(--card);border:1px dashed rgba(232,184,75,.2);border-radius:8px;overflow:hidden;opacity:.75}
+.tbdh{background:var(--card2);padding:3px 10px;font-size:.58rem;color:var(--grey);display:flex;justify-content:space-between}
+.tbdt{padding:7px 10px;font-size:.76rem;color:var(--grey);font-style:italic}
+.tbdt+.tbdt{border-top:1px solid rgba(255,255,255,.04)}
+.fw{max-width:380px;margin:0 auto 8px}
+.fcard{background:var(--card);border:2px solid rgba(232,184,75,.5);border-radius:8px;overflow:hidden}
+.fhd{background:rgba(232,184,75,.15);padding:4px 10px;font-size:.6rem;color:var(--gold);letter-spacing:1px;display:flex;justify-content:space-between}
+.ftt{padding:14px 12px;font-size:.9rem;color:var(--grey);font-style:italic}
+.ftt+.ftt{border-top:1px solid rgba(255,255,255,.05)}
+.trophy{text-align:center;font-size:3rem;padding:20px}
+.fsep{display:flex;align-items:center;gap:10px;padding:18px 0 6px}
+.fsl{flex:1;height:1px;background:rgba(232,184,75,.4)}
+.fsb{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:3px;color:#fff}
+.fi{font-size:.67rem;color:var(--grey);text-align:center;letter-spacing:1px;margin-bottom:10px}
+.loading{text-align:center;padding:40px;color:var(--grey)}
+@media(max-width:400px){.bg2{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="htop">
+    <h1>Mondial 2026</h1>
+    <p class="sub">USA &middot; Canada &middot; Mexique</p>
+    <div class="ubar">
+      <span class="uinfo" id="uinfo">Chargement...</span>
+      <span id="liveind" style="display:none" class="live-indicator"><span class="live-dot"></span>LIVE</span>
+      <button class="btnr" id="btnr" onclick="loadData()"><span id="rico">&#8635;</span> Actualiser</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('accueil',this)">&#127968; Accueil</button>
+    <button class="tab" onclick="showTab('resultats',this)">Resultats</button>
+    <button class="tab" onclick="showTab('groupes',this)">Groupes</button>
+    <button class="tab" onclick="showTab('avenir',this)">A venir</button>
+    <button class="tab" onclick="showTab('tableau',this)">Tableau</button>
+  </div>
+</div>
+<div class="main">
+  <div id="accueil" class="section active"><div class="loading">&#9917; Chargement...</div></div>
+  <div id="resultats" class="section"></div>
+  <div id="groupes" class="section"></div>
+  <div id="avenir" class="section"></div>
+  <div id="tableau" class="section"></div>
+</div>
+
+<script>
+var FL={MEX:"&#127474;&#127485;",KOR:"&#127472;&#127479;",CZE:"&#127464;&#127487;",RSA:"&#127487;&#127462;",CAN:"&#127464;&#127462;",SUI:"&#127464;&#127469;",BIH:"&#127463;&#127462;",QAT:"&#127478;&#127462;",BRA:"&#127463;&#127479;",MAR:"&#127474;&#127462;",SCO:"&#127480;&#127464;",HTI:"&#127469;&#127481;",USA:"&#127482;&#127480;",AUS:"&#127462;&#127482;",PAR:"&#127477;&#127486;",TUR:"&#127481;&#127479;",GER:"&#127465;&#127466;",CIV:"&#127464;&#127470;",ECU:"&#127466;&#127464;",CUW:"&#127988;",NED:"&#127475;&#127473;",JPN:"&#127471;&#127477;",SWE:"&#127480;&#127466;",TUN:"&#127481;&#127475;",EGY:"&#127466;&#127468;",IRN:"&#127470;&#127479;",BEL:"&#127463;&#127466;",NZL:"&#127475;&#127487;",ESP:"&#127466;&#127480;",URU:"&#127482;&#127486;",CPV:"&#127464;&#127483;",KSA:"&#127480;&#127462;",FRA:"&#127467;&#127479;",NOR:"&#127475;&#127476;",SEN:"&#127480;&#127475;",IRQ:"&#127470;&#127478;",ARG:"&#127462;&#127479;",AUT:"&#127462;&#127481;",DZA:"&#127465;&#127487;",JOR:"&#127471;&#127476;",COL:"&#127464;&#127476;",POR:"&#127477;&#127481;",COD:"&#127464;&#127465;",UZB:"&#127482;&#127487;",ENG:"&#127968;",GHA:"&#127468;&#127469;",CRO:"&#127469;&#127479;",PAN:"&#127477;&#127462;"};
+var FR={Mexico:"Mexique","South Africa":"Afr. Sud","South Korea":"Coree S.",Czechia:"Tcheque","Czech Republic":"Tcheque",Canada:"Canada",Switzerland:"Suisse","Bosnia and Herzegovina":"Bosnie","Bosnia-Herzegovina":"Bosnie",Qatar:"Qatar",Brazil:"Bresil",Morocco:"Maroc",Scotland:"Ecosse",Haiti:"Haiti","United States":"Etats-Unis",USA:"Etats-Unis",Australia:"Australie",Paraguay:"Paraguay",Turkiye:"Turquie",Turkey:"Turquie",Germany:"Allemagne","Ivory Coast":"Cote Ivoire","Cote d'Ivoire":"Cote Ivoire",Ecuador:"Equateur",Curacao:"Curacao",Netherlands:"Pays-Bas",Japan:"Japon",Sweden:"Suede",Tunisia:"Tunisie",Egypt:"Egypte","IR Iran":"Iran",Iran:"Iran",Belgium:"Belgique","New Zealand":"N-Zelande",Spain:"Espagne",Uruguay:"Uruguay","Cape Verde":"Cap-Vert","Saudi Arabia":"Arabie Sao.",France:"France",Norway:"Norvege",Senegal:"Senegal",Iraq:"Iraq",Argentina:"Argentine",Austria:"Autriche",Algeria:"Algerie",Jordan:"Jordanie",Colombia:"Colombie",Portugal:"Portugal","Congo DR":"Congo RD","DR Congo":"Congo RD",Uzbekistan:"Ouzbekistan",England:"Angleterre",Ghana:"Ghana",Croatia:"Croatie",Panama:"Panama","Korea Republic":"Coree S.","Bosnia-Herzegovina":"Bosnie","Ivory Coast":"Cote Ivoire","DR Congo":"Congo RD","Cape Verde":"Cap-Vert","New Zealand":"N-Zelande","South Korea":"Coree S.","Czech Republic":"Tcheque","Saudi Arabia":"Arabie Sao.","United States":"Etats-Unis"};
+var allM=[],allS=[],curTab="accueil",activeGrp="ALL",refreshTimer=null;
+
+function fl(a){return FL[a]||"&#127988;";}
+function fn(n){return FR[n]||n;}
+function fmtD(iso){try{var d=new Date(iso);return d.toLocaleDateString("fr-BE",{day:"2-digit",month:"2-digit",timeZone:"Europe/Brussels"});}catch(e){return "";}}
+function fmtH(iso){try{var d=new Date(iso);return d.toLocaleTimeString("fr-BE",{hour:"2-digit",minute:"2-digit",timeZone:"Europe/Brussels"});}catch(e){return "";}}
+function fmtDL(iso){try{var d=new Date(iso);return d.toLocaleDateString("fr-BE",{weekday:"long",day:"numeric",month:"long",timeZone:"Europe/Brussels"});}catch(e){return "";}}
+
+function showTab(id,btn){
+  document.querySelectorAll(".section").forEach(function(s){s.classList.remove("active");});
+  document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("active");});
+  document.getElementById(id).classList.add("active");
+  if(btn)btn.classList.add("active");
+  curTab=id;
+  renderTab(id);
+}
+
+var AF_KEY="8007e7f96b5c5c2c6ac35fa56c77a33e";
+var AF_ABB={"Mexico":"MEX","South Africa":"RSA","Korea Republic":"KOR","Czech Republic":"CZE","Canada":"CAN","Switzerland":"SUI","Bosnia and Herzegovina":"BIH","Qatar":"QAT","Brazil":"BRA","Morocco":"MAR","Scotland":"SCO","Haiti":"HTI","United States":"USA","Australia":"AUS","Paraguay":"PAR","Turkiye":"TUR","Turkey":"TUR","Germany":"GER","Cote d'Ivoire":"CIV","Ivory Coast":"CIV","Ecuador":"ECU","Curacao":"CUW","Netherlands":"NED","Japan":"JPN","Sweden":"SWE","Tunisia":"TUN","Egypt":"EGY","IR Iran":"IRN","Iran":"IRN","Belgium":"BEL","New Zealand":"NZL","Spain":"ESP","Uruguay":"URU","Cape Verde":"CPV","Saudi Arabia":"KSA","France":"FRA","Norway":"NOR","Senegal":"SEN","Iraq":"IRQ","Argentina":"ARG","Austria":"AUT","Algeria":"DZA","Jordan":"JOR","Colombia":"COL","Portugal":"POR","DR Congo":"COD","Uzbekistan":"UZB","England":"ENG","Ghana":"GHA","Croatia":"CRO","Panama":"PAN"};
+
+function updateLiveScores(){
+  return fetch("https://v3.football.api-sports.io/fixtures?live=all",{
+    headers:{"x-apisports-key":AF_KEY}
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    (data.response||[]).forEach(function(m){
+      if(!m.league||m.league.id!==1||m.league.season!==2026)return;
+      var hAbb=AF_ABB[m.teams.home.name]||"";
+      var aAbb=AF_ABB[m.teams.away.name]||"";
+      if(!hAbb||!aAbb)return;
+      var elapsed=m.fixture.status.elapsed||0;
+      var sH=m.goals.home||0;
+      var sA=m.goals.away||0;
+      allM.forEach(function(g){
+        if(g.home===hAbb&&g.away===aAbb){
+          g.status="in_progress";
+          g.scoreH=sH;
+          g.scoreA=sA;
+          g.elapsed=elapsed+"'";
+        }
+      });
+    });
+  })
+  .catch(function(e){console.warn("API-Football live erreur:",e);});
+}
+
+function loadData(){
+  var btn=document.getElementById("btnr");
+  var ico=document.getElementById("rico");
+  var info=document.getElementById("uinfo");
+  btn.disabled=true;
+  ico.className="spinning";
+  info.textContent="Mise a jour...";
+
+  fetch("./worldcup.json?t="+Date.now())
+    .then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json();})
+    .then(function(data){
+      allM=data.games||[];
+      allS=data.standings||[];
+      var src=data.source||"";
+      var live=allM.filter(function(m){return m.status==="in_progress";});
+      // Si matchs en cours, appel direct API-Football pour minutes a jour
+      var livePromise=updateLiveScores(); // Toujours appeler pour detecter matchs en cours
+      return livePromise.then(function(){
+        var now=new Date();
+        info.textContent="Mis a jour "+now.toLocaleTimeString("fr-BE",{hour:"2-digit",minute:"2-digit"});
+        if(src)info.textContent+=" ("+src+")";
+        var liveNow=allM.filter(function(m){return m.status==="in_progress";});
+        var lind=document.getElementById("liveind");
+        if(liveNow.length>0){
+          lind.style.display="inline-flex";
+          lind.textContent="";
+          var dot=document.createElement("span");dot.className="live-dot";
+          lind.appendChild(dot);
+          lind.appendChild(document.createTextNode(" "+liveNow.length+" EN COURS"));
+          scheduleRefresh(true);
+        } else {
+          lind.style.display="none";
+          scheduleRefresh(false);
+        }
+        btn.disabled=false;ico.className="";ico.innerHTML="&#8635;";
+        renderTab(curTab);
+      });
+    })
+    .catch(function(e){
+      info.textContent="Erreur - verifiez la connexion";
+      btn.disabled=false;ico.className="";ico.innerHTML="&#8635;";
+    });
+}
+
+function scheduleRefresh(hasLive){
+  if(refreshTimer)clearInterval(refreshTimer);
+  var interval=hasLive ? 5*60*1000 : 60*60*1000;
+  refreshTimer=setInterval(loadData,interval);
+}
+
+function renderTab(id){
+  if(id==="accueil")renderAccueil();
+  else if(id==="resultats")renderResultats();
+  else if(id==="groupes")renderGroupes(activeGrp);
+  else if(id==="avenir")renderAvenir();
+  else if(id==="tableau")renderTableau();
+}
+
+// ── ACCUEIL ──────────────────────────────────────────────
+function renderAccueil(){
+  var live=allM.filter(function(m){return m.status==="in_progress";});
+  var fin=allM.filter(function(m){return m.status==="final";}).sort(function(a,b){return new Date(b.start)-new Date(a.start);});
+  var up=allM.filter(function(m){return m.status==="scheduled"&&m.group;}).sort(function(a,b){return new Date(a.start)-new Date(b.start);}).slice(0,4);
+  var belG=allS.filter(function(t){return t.g==="G";});
+  var h="";
+
+  // Stats banner
+  h+='<div class="stats">';
+  h+='<div class="stat"><div class="sn">'+fin.length+'</div><div class="sl">Joues</div></div>';
+  h+='<div class="stat"><div class="sn">'+live.length+'</div><div class="sl" style="color:'+(live.length>0?"var(--live)":"var(--grey)")+'">En cours</div></div>';
+  h+='<div class="stat"><div class="sn">48</div><div class="sl">Nations</div></div>';
+  h+='<div class="stat"><div class="sn" style="font-size:1.6rem;font-family:Inter">&#127463;&#127466;</div><div class="sl">Grp G</div></div>';
+  h+='</div>';
+
+  // LIVE matchs
+  if(live.length>0){
+    h+='<div class="live-card"><div class="live-ct"><span class="live-dot"></span>MATCHS EN COURS</div>';
+    live.forEach(function(m){
+      h+='<div class="live-match">';
+      h+='<div class="lm-team">'+fl(m.home)+' '+fn(m.homeN||m.home)+'</div>';
+      h+='<div class="lm-score"><span class="lm-sv">'+m.scoreH+' - '+m.scoreA+'</span>';
+      if(m.elapsed)h+='<div class="lm-elapsed">&#9201; '+m.elapsed+'</div>';
+      else h+='<div class="lm-elapsed">&#128994; LIVE</div>';
+      h+='</div>';
+      h+='<div class="lm-team r">'+fn(m.awayN||m.away)+' '+fl(m.away)+'</div>';
+      h+='</div>';
+    });
+    h+='</div>';
+  }
+
+  // Belgique
+  if(belG.length){
+    h+='<div class="card bel"><div class="ct bel">&#127463;&#127466; Belgique &mdash; Groupe G</div>'+stbl(belG)+'</div>';
+  }
+
+  // Derniers resultats
+  h+='<div class="card"><div class="ct">Derniers resultats</div>';
+  var rec=fin.slice(0,6);
+  if(rec.length)rec.forEach(function(m){h+=mrow(m);});
+  else h+='<div style="padding:14px;color:var(--grey);text-align:center">Aucun resultat</div>';
+  h+='</div>';
+
+  // Prochains
+  h+='<div class="card"><div class="ct">Prochains matchs</div>';
+  if(up.length)up.forEach(function(m){h+=mrow(m);});
+  else h+='<div style="padding:14px;color:var(--grey);text-align:center">Aucun match programme</div>';
+  h+='</div>';
+
+  document.getElementById("accueil").innerHTML=h;
+}
+
+// ── RESULTATS ────────────────────────────────────────────
+function renderResultats(){
+  var live=allM.filter(function(m){return m.status==="in_progress";});
+  var fin=allM.filter(function(m){return m.status==="final";}).sort(function(a,b){return new Date(b.start)-new Date(a.start);});
+  var h="";
+
+  if(live.length){
+    h+='<div class="live-card"><div class="live-ct"><span class="live-dot"></span>EN COURS</div>';
+    live.forEach(function(m){
+      h+='<div class="live-match">';
+      h+='<div class="lm-team">'+fl(m.home)+' '+fn(m.homeN||m.home)+'</div>';
+      h+='<div class="lm-score"><span class="lm-sv">'+m.scoreH+' - '+m.scoreA+'</span>';
+      h+='<div class="lm-elapsed">'+( m.elapsed ? '&#9201; '+m.elapsed : '&#128994; LIVE')+'</div></div>';
+      h+='<div class="lm-team r">'+fn(m.awayN||m.away)+' '+fl(m.away)+'</div>';
+      h+='</div>';
+    });
+    h+='</div>';
+  }
+
+  var bd={};
+  fin.forEach(function(m){var d=fmtDL(m.start);if(!bd[d])bd[d]=[];bd[d].push(m);});
+  Object.entries(bd).forEach(function(e){
+    h+='<div class="dsep">'+e[0]+'</div><div class="card">';
+    e[1].forEach(function(m){h+=mrow(m);});
+    h+='</div>';
+  });
+  if(!fin.length&&!live.length)h='<div style="padding:30px;text-align:center;color:var(--grey)">Aucun resultat</div>';
+  document.getElementById("resultats").innerHTML=h;
+}
+
+// ── GROUPES ──────────────────────────────────────────────
+function renderGroupes(filter){
+  activeGrp=filter;
+  var grps=[...new Set(allS.map(function(t){return t.g;}))].sort();
+  var shown=filter==="ALL"?grps:[filter];
+  var nav='<div class="gnav"><button class="gb'+(filter==="ALL"?" active":"")+'" onclick="renderGroupes(\'ALL\');ugb(this)">Tous</button>';
+  grps.forEach(function(g){nav+='<button class="gb'+(filter===g?" active":"")+'" onclick="renderGroupes(\''+g+'\');ugb(this)">Grp '+g+'</button>';});
+  nav+='</div>';
+  var h=nav;
+  shown.forEach(function(g){
+    h+='<div class="card"><div class="ct">Groupe '+g+'</div>'+stbl(allS.filter(function(t){return t.g===g;}))+' </div>';
+  });
+  document.getElementById("groupes").innerHTML=h;
+}
+function ugb(b){document.querySelectorAll(".gb").forEach(function(x){x.classList.remove("active");});b.classList.add("active");}
+
+// ── A VENIR ──────────────────────────────────────────────
+function fmtTeamAvenir(name){
+  if(!name)return "A determiner";
+  if(name.length>3&&!/^[12W3L]/.test(name))return name;
+  if(name.length===2&&/^[12]/.test(name)&&/[A-L]$/.test(name)){
+    return (name[0]==="1"?"1er":"2e")+" Grp "+name[1];
+  }
+  if(/^3[A-L]/.test(name)){return "3e Grp "+name.slice(1).replace(/\/$/,"");}
+  if(/^W\d+$/.test(name))return "Vainqueur M"+name.slice(1);
+  if(/^L\d+$/.test(name))return "Perdant M"+name.slice(1);
+  return name;
+}
+function renderAvenir(){
+  var all=allM.filter(function(m){return m.status==="scheduled";}).sort(function(a,b){return new Date(a.start)-new Date(b.start);});
+  var grpM=all.filter(function(m){return !!m.group;});
+  var koM=all.filter(function(m){return !m.group;});
+  var h="";
+  function renderSection(list){
+    var bd={};
+    list.forEach(function(m){var d=fmtDL(m.start);if(!bd[d])bd[d]=[];bd[d].push(m);});
+    Object.entries(bd).forEach(function(e){
+      h+='<div class="dsep">'+e[0]+'</div><div class="card">';
+      e[1].forEach(function(m){
+        var label=m.group?"Grp "+m.group:(m.phase||"");
+        var hN=m.group?fn(m.homeN||m.home):fmtTeamAvenir(m.homeN||m.home);
+        var aN=m.group?fn(m.awayN||m.away):fmtTeamAvenir(m.awayN||m.away);
+        var hFlag=m.group||FL[m.home]?fl(m.home):"";
+        var aFlag=m.group||FL[m.away]?fl(m.away):"";
+        h+='<div class="upm"><div class="upi">';
+        h+='<div class="upt"><div class="un">'+hFlag+' '+hN+'</div>';
+        if(m.probH){h+='<div class="pb"><div class="pf" style="width:'+m.probH+'%"></div></div>';h+='<div class="pp">'+m.probH+'%</div>';}
+        h+='</div>';
+        h+='<div class="upc"><div class="ucg">'+label+'</div><div class="uch">'+fmtH(m.start)+'</div><div class="ucd">'+fmtD(m.start)+'</div></div>';
+        h+='<div class="upt r"><div class="un">'+aN+' '+aFlag+'</div>';
+        if(m.probA){h+='<div class="pb" style="direction:rtl"><div class="pf" style="width:'+m.probA+'%"></div></div>';h+='<div class="pp r">'+m.probA+'%</div>';}
+        h+='</div></div></div>';
+      });
+      h+='</div>';
+    });
+  }
+  renderSection(grpM);
+  if(koM.length){
+    h+='<div class="dsep" style="color:var(--gold)">Phase eliminatoire</div>';
+    renderSection(koM);
+  }
+  if(!h)h='<div style="padding:30px;text-align:center;color:var(--grey)">Aucun match programme</div>';
+  document.getElementById("avenir").innerHTML=h;
+}
+
+// ── TABLEAU ──────────────────────────────────────────────
+function renderTableau(){
+  function sep(t,d){return '<div class="psep"><div class="pll"></div><span class="ptt">'+t+'</span><div class="pll"></div></div><div class="pdd">'+d+'</div>';}
+
+  function fmtTeam(name){
+    if(!name)return "A determiner";
+    // Vrai nom
+    if(name.length>3&&!/^[12W3L]/.test(name))return name;
+    // "1I" ou "2G" -> "1er/2e Grp X"
+    if(name.length===2&&/^[12]/.test(name)&&/[A-L]$/.test(name)){
+      return (name[0]==="1"?"1er":"2e")+" Grp "+name[1];
+    }
+    // "3A/B/C" -> "3e Grp A/B/C"
+    if(/^3[A-L]/.test(name)){
+      var grps=name.slice(1).replace(/\/$/,"");
+      return "3e Grp "+grps;
+    }
+    // "W74" -> "Vainqueur M74"
+    if(/^W\d+$/.test(name))return "Vainqueur M"+name.slice(1);
+    // "L101" -> "Perdant M101"
+    if(/^L\d+$/.test(name))return "Perdant M"+name.slice(1);
+    return name;
+  }
+
+  function fmtD(iso){
+    try{
+      var dt=new Date(iso);
+      return dt.toLocaleDateString("fr-BE",{day:"2-digit",month:"2-digit",timeZone:"Europe/Brussels"});
+    }catch(e){return "";}
+  }
+
+  function matchCard(m){
+    var hN=fmtTeam(m.homeN||m.home);
+    var aN=fmtTeam(m.awayN||m.away);
+    var hF=m.home&&FL[m.home]?fl(m.home):"";
+    var aF=m.away&&FL[m.away]?fl(m.away):"";
+    var d=fmtD(m.start);
+    var score=m.status==="final"?
+      '<span style="color:var(--gold);font-family:Bebas Neue,sans-serif;font-size:1.1rem">'+m.scoreH+" - "+m.scoreA+'</span>':
+      '<span style="color:var(--grey);font-size:.7rem">'+d+'</span>';
+    var known=m.status==="final";
+    return '<div class="tbd"'+(known?' style="opacity:1;border-color:rgba(232,184,75,.4)"':'')+'>'+
+      '<div class="tbdh"><span>M'+m.id+'</span>'+score+'</div>'+
+      '<div class="tbdt">'+hF+' '+hN+'</div>'+
+      '<div class="tbdt">'+aF+' '+aN+'</div></div>';
+  }
+
+  // Lire les matchs depuis allM
+  var ko16=allM.filter(function(m){return m.phase==="16es de finale";}).sort(function(a,b){return new Date(a.start)-new Date(b.start);});
+  var ko8=allM.filter(function(m){return m.phase==="8es de finale";}).sort(function(a,b){return new Date(a.start)-new Date(b.start);});
+  var koQF=allM.filter(function(m){return m.phase==="Quarter-final"||m.phase==="Quarts de finale";}).sort(function(a,b){return new Date(a.start)-new Date(b.start);});
+  var koSF=allM.filter(function(m){return m.phase==="Semi-final"||m.phase==="Demi-finales";}).sort(function(a,b){return new Date(a.start)-new Date(b.start);});
+  var ko3P=allM.filter(function(m){return m.phase==="Match for third place"||m.phase==="Petite finale";});
+  var koF=allM.filter(function(m){return m.phase==="Finale";});
+
+  var h="";
+
+  // Phase de groupes encore en cours?
+  var grpLeft=allM.filter(function(m){return m.group&&m.status==="scheduled";}).length;
+  if(grpLeft>0){
+    h+='<div class="ibox">'+grpLeft+' matchs de groupe restants &mdash; tableau en cours de constitution</div>';
+  }
+
+  if(ko16.length){
+    h+=sep("16es DE FINALE","28 juin &mdash; 4 juillet 2026")+'<div class="bg2">';
+    ko16.forEach(function(m){h+=matchCard(m);});
+    h+='</div>';
+  }
+  if(ko8.length){
+    h+=sep("8es DE FINALE","4 &mdash; 7 juillet 2026")+'<div class="bg2">';
+    ko8.forEach(function(m){h+=matchCard(m);});
+    h+='</div>';
+  }
+  if(koQF.length){
+    h+=sep("QUARTS DE FINALE","9 &mdash; 12 juillet 2026")+'<div class="bg2">';
+    koQF.forEach(function(m){h+=matchCard(m);});
+    h+='</div>';
+  }
+  if(koSF.length){
+    h+=sep("DEMI-FINALES","14 &mdash; 15 juillet 2026")+'<div class="bg2">';
+    koSF.forEach(function(m){h+=matchCard(m);});
+    h+='</div>';
+  }
+  if(ko3P.length){
+    h+=sep("PETITE FINALE","18 juillet 2026")+'<div class="fw">';
+    ko3P.forEach(function(m){h+=matchCard(m);});
+    h+='</div>';
+  }
+  h+='<div class="fsep"><div class="fsl"></div><span class="fsb">FINALE</span><div class="fsl"></div></div>';
+  h+='<div class="fi">19 JUILLET 2026 &middot; METLIFE STADIUM NEW YORK &middot; 19h CEST</div>';
+  if(koF.length){
+    h+='<div class="fw">'+matchCard(koF[0])+'</div>';
+  }else{
+    h+='<div class="fw"><div class="fcard"><div class="fhd"><span>FINALE MONDIALE</span><span>19 juil. 19h</span></div><div class="ftt">A determiner</div><div class="ftt">A determiner</div></div></div>';
+  }
+  h+='<div class="trophy">&#127942;</div>';
+  document.getElementById("tableau").innerHTML=h;
+}
+
+// ── HELPERS ──────────────────────────────────────────────
+function mrow(m){
+  var done=m.status==="final";
+  var bel=m.home==="BEL"||m.away==="BEL";
+  var hW=done&&m.scoreH>m.scoreA,aW=done&&m.scoreA>m.scoreH;
+  var cls=bel?"match bm":"match";
+  var hc=hW?"mh w":aW?"mh l":"mh";
+  var ac=aW?"ma w":hW?"ma l":"ma";
+  var sc=done?'<span class="sv">'+m.scoreH+' - '+m.scoreA+'</span>':'<span class="vs">VS</span>';
+  var label=m.group?("Grp "+m.group):(m.phase||"");
+  return '<div class="'+cls+'"><span class="'+hc+'">'+fl(m.home)+' '+fn(m.homeN||m.home)+'</span><div class="ms">'+sc+'</div><span class="'+ac+'">'+fn(m.awayN||m.away)+' '+fl(m.away)+'</span><div class="mt"><div class="mg">'+label+' '+fmtD(m.start)+'</div><div class="mhr">'+fmtH(m.start)+'</div></div></div>';
+}
+
+function stbl(teams){
+  var h='<table class="standings"><thead><tr><th style="text-align:left">Equipe</th><th>J</th><th class="vc">V</th><th>N</th><th class="dc">D</th><th class="pc">Pts</th></tr></thead><tbody>';
+  teams.forEach(function(t){
+    var bel=t.a==="BEL"?"br":"";
+    h+='<tr class="'+bel+'"><td><span class="rb r'+t.r+'">'+t.r+'</span>'+fl(t.a)+' '+t.n+'</td><td>'+t.j+'</td><td class="vc">'+t.v+'</td><td>'+t.nul+'</td><td class="dc">'+t.d+'</td><td class="pc">'+t.pts+'</td></tr>';
+  });
+  return h+'</tbody></table>';
+}
+
+// ── INIT ─────────────────────────────────────────────────
+loadData();
+</script>
+</body>
+</html>
