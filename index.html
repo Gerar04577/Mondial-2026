@@ -172,12 +172,18 @@ var AF_ABB={"Mexico":"MEX","South Africa":"RSA","Korea Republic":"KOR","Czech Re
 
 function updateLiveScores(){
   return fetch("https://v3.football.api-sports.io/fixtures?live=all",{
-    headers:{"x-apisports-key":AF_KEY}
+    method:"GET",
+    headers:{"x-apisports-key":AF_KEY,"x-rapidapi-host":"v3.football.api-sports.io"}
   })
-  .then(function(r){return r.json();})
+  .then(function(r){
+    if(!r.ok){console.warn("API-Football HTTP erreur:",r.status);return null;}
+    return r.json();
+  })
   .then(function(data){
-    (data.response||[]).forEach(function(m){
-      if(!m.league||m.league.id!==1||m.league.season!==2026)return;
+    if(!data){return null;}
+    var live=data.response||[];
+    var wc=live.filter(function(m){return m.league&&m.league.id===1&&m.league.season===2026;});
+    wc.forEach(function(m){
       var hAbb=AF_ABB[m.teams.home.name]||"";
       var aAbb=AF_ABB[m.teams.away.name]||"";
       if(!hAbb||!aAbb)return;
@@ -193,8 +199,9 @@ function updateLiveScores(){
         }
       });
     });
+    return wc.length;
   })
-  .catch(function(e){console.warn("API-Football live erreur:",e);});
+  .catch(function(e){return null;});
 }
 
 function loadData(){
@@ -213,8 +220,11 @@ function loadData(){
       var src=data.source||"";
       var live=allM.filter(function(m){return m.status==="in_progress";});
       // Si matchs en cours, appel direct API-Football pour minutes a jour
-      var livePromise=updateLiveScores(); // Toujours appeler pour detecter matchs en cours
-      return livePromise.then(function(){
+      var livePromise=updateLiveScores();
+      return livePromise.then(function(afCount){
+        if(afCount!==undefined){
+          info.textContent+=" | AF: "+(afCount===null?"erreur":afCount+" live");
+        }
         var now=new Date();
         info.textContent="Mis a jour "+now.toLocaleTimeString("fr-BE",{hour:"2-digit",minute:"2-digit"});
         if(src)info.textContent+=" ("+src+")";
