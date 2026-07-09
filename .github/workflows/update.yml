@@ -12,14 +12,14 @@ jobs:
       - uses: actions/checkout@v4
       - run: |
           python3 - << 'EOF'
-          import json, urllib.request, datetime, re
+          import json, urllib.request, datetime, re, os
 
           API_KEY = "8007e7f96b5c5c2c6ac35fa56c77a33e"
 
-          ABB={"Mexico":"MEX","South Africa":"RSA","South Korea":"KOR","Czech Republic":"CZE","Canada":"CAN","Switzerland":"SUI","Bosnia-Herzegovina":"BIH","Qatar":"QAT","Brazil":"BRA","Morocco":"MAR","Scotland":"SCO","Haiti":"HTI","United States":"USA","Australia":"AUS","Paraguay":"PAR","Turkey":"TUR","Germany":"GER","Ivory Coast":"CIV","Ecuador":"ECU","Curacao":"CUW","Netherlands":"NED","Japan":"JPN","Sweden":"SWE","Tunisia":"TUN","Egypt":"EGY","Iran":"IRN","IR Iran":"IRN","Belgium":"BEL","New Zealand":"NZL","Spain":"ESP","Uruguay":"URU","Cape Verde":"CPV","Saudi Arabia":"KSA","France":"FRA","Norway":"NOR","Senegal":"SEN","Iraq":"IRQ","Argentina":"ARG","Austria":"AUT","Algeria":"DZA","Jordan":"JOR","Colombia":"COL","Portugal":"POR","DR Congo":"COD","Uzbekistan":"UZB","England":"ENG","Ghana":"GHA","Croatia":"CRO","Panama":"PAN"}
-          FR={"Mexico":"Mexique","South Africa":"Afr. Sud","South Korea":"Coree S.","Czech Republic":"Tcheque","Canada":"Canada","Switzerland":"Suisse","Bosnia-Herzegovina":"Bosnie","Qatar":"Qatar","Brazil":"Bresil","Morocco":"Maroc","Scotland":"Ecosse","Haiti":"Haiti","United States":"Etats-Unis","Australia":"Australie","Paraguay":"Paraguay","Turkey":"Turquie","Germany":"Allemagne","Ivory Coast":"Cote Ivoire","Ecuador":"Equateur","Curacao":"Curacao","Netherlands":"Pays-Bas","Japan":"Japon","Sweden":"Suede","Tunisia":"Tunisie","Egypt":"Egypte","Iran":"Iran","IR Iran":"Iran","Belgium":"Belgique","New Zealand":"N-Zelande","Spain":"Espagne","Uruguay":"Uruguay","Cape Verde":"Cap-Vert","Saudi Arabia":"Arabie Sao.","France":"France","Norway":"Norvege","Senegal":"Senegal","Iraq":"Iraq","Argentina":"Argentine","Austria":"Autriche","Algeria":"Algerie","Jordan":"Jordanie","Colombia":"Colombie","Portugal":"Portugal","DR Congo":"Congo RD","Uzbekistan":"Ouzbekistan","England":"Angleterre","Ghana":"Ghana","Croatia":"Croatie","Panama":"Panama"}
-          PHASE_FR={"Round of 32":"16es de finale","Round of 16":"8es de finale","Quarterfinals":"Quarts de finale","Semifinals":"Demi-finales","Third place":"Petite finale","Final":"Finale"}
-          API_MAPPING={"Bosnia and Herzegovina":"Bosnia-Herzegovina","Korea Republic":"South Korea","Turkiye":"Turkey","Cote d'Ivoire":"Ivory Coast","IR Iran":"Iran","New Zealand":"New Zealand","DR Congo":"DR Congo"}
+          ABB={"Mexico":"MEX","South Africa":"RSA","South Korea":"KOR","Czech Republic":"CZE","Canada":"CAN","Switzerland":"SUI","Bosnia-Herzegovina":"BIH","Bosnia and Herzegovina":"BIH","Qatar":"QAT","Brazil":"BRA","Morocco":"MAR","Scotland":"SCO","Haiti":"HTI","United States":"USA","Australia":"AUS","Paraguay":"PAR","Turkey":"TUR","Turkiye":"TUR","Germany":"GER","Ivory Coast":"CIV","Ecuador":"ECU","Curacao":"CUW","Netherlands":"NED","Japan":"JPN","Sweden":"SWE","Tunisia":"TUN","Egypt":"EGY","Iran":"IRN","IR Iran":"IRN","Belgium":"BEL","New Zealand":"NZL","Spain":"ESP","Uruguay":"URU","Cape Verde":"CPV","Saudi Arabia":"KSA","France":"FRA","Norway":"NOR","Senegal":"SEN","Iraq":"IRQ","Argentina":"ARG","Austria":"AUT","Algeria":"DZA","Jordan":"JOR","Colombia":"COL","Portugal":"POR","DR Congo":"COD","Uzbekistan":"UZB","England":"ENG","Ghana":"GHA","Croatia":"CRO","Panama":"PAN"}
+          FR={"Mexico":"Mexique","South Africa":"Afr. Sud","South Korea":"Coree S.","Czech Republic":"Tcheque","Canada":"Canada","Switzerland":"Suisse","Bosnia-Herzegovina":"Bosnie","Bosnia and Herzegovina":"Bosnie","Qatar":"Qatar","Brazil":"Bresil","Morocco":"Maroc","Scotland":"Ecosse","Haiti":"Haiti","United States":"Etats-Unis","Australia":"Australie","Paraguay":"Paraguay","Turkey":"Turquie","Turkiye":"Turquie","Germany":"Allemagne","Ivory Coast":"Cote Ivoire","Ecuador":"Equateur","Curacao":"Curacao","Netherlands":"Pays-Bas","Japan":"Japon","Sweden":"Suede","Tunisia":"Tunisie","Egypt":"Egypte","Iran":"Iran","IR Iran":"Iran","Belgium":"Belgique","New Zealand":"N-Zelande","Spain":"Espagne","Uruguay":"Uruguay","Cape Verde":"Cap-Vert","Saudi Arabia":"Arabie Sao.","France":"France","Norway":"Norvege","Senegal":"Senegal","Iraq":"Iraq","Argentina":"Argentine","Austria":"Autriche","Algeria":"Algerie","Jordan":"Jordanie","Colombia":"Colombie","Portugal":"Portugal","DR Congo":"Congo RD","Uzbekistan":"Ouzbekistan","England":"Angleterre","Ghana":"Ghana","Croatia":"Croatie","Panama":"Panama"}
+          PHASE_FR={"Round of 32":"16es de finale","Round of 16":"8es de finale","Quarterfinals":"Quarts de finale","Quarter-finals":"Quarts de finale","Semifinals":"Demi-finales","Semi-finals":"Demi-finales","Third place":"Petite finale","Match for third place":"Petite finale","Final":"Finale"}
+          API_MAPPING={"Bosnia and Herzegovina":"Bosnia-Herzegovina","Korea Republic":"South Korea","Turkiye":"Turkey","Cote d'Ivoire":"Ivory Coast","IR Iran":"Iran","DR Congo":"DR Congo"}
 
           def fetch(url, headers={}):
               req = urllib.request.Request(url, headers={"User-Agent":"Mozilla/5.0", **headers})
@@ -38,31 +38,32 @@ jobs:
 
           now_utc = datetime.datetime.now(datetime.timezone.utc)
 
-          # Lire worldcup.json actuel pour verifier si des matchs scheduled ont commence
-          import os
-          need_ft_update = False
+          # Verifier si on est dans une fenetre de match (+/- 30 min autour du coup d'envoi)
+          in_match_window = False
           try:
               if os.path.exists("worldcup.json"):
                   with open("worldcup.json") as wf:
                       current = json.load(wf)
                   for g in current.get("games", []):
-                      if g.get("status") == "scheduled" and g.get("start"):
+                      if g.get("status") in ("scheduled", "in_progress") and g.get("start"):
                           try:
                               dt = datetime.datetime.strptime(g["start"][:19], "%Y-%m-%dT%H:%M:%S")
                               dt = dt.replace(tzinfo=datetime.timezone.utc)
                               diff = (now_utc - dt).total_seconds() / 60
-                              # Match aurait du commencer il y a entre 5 et 150 min
-                              if 5 <= diff <= 150:
-                                  need_ft_update = True
+                              if -30 <= diff <= 150:
+                                  in_match_window = True
                                   break
-                          except:
-                              pass
-          except:
-              pass
+                          except: pass
+          except: pass
 
-          call_full = need_ft_update or now_utc.minute < 10
+          # Hors fenetre de match: appeler seulement 1x/heure (minute==0)
+          if not in_match_window and now_utc.minute != 0:
+              print(f"Hors fenetre match, minute={now_utc.minute} -> skip")
+              exit(0)
 
-          # ── ETAPE 1: openfootball - heures UTC ──────────────────
+          print(f"En fenetre: {in_match_window}, minute={now_utc.minute}")
+
+          # ETAPE 1: openfootball - heures UTC
           try:
               of = fetch("https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json")
               matches = of.get("matches", [])
@@ -70,71 +71,39 @@ jobs:
           except Exception as e:
               print(f"openfootball ERREUR: {e}"); exit(0)
 
-          # ── ETAPE 2: API-Football - matchs termines (1x/heure) ──
-          af_index = {}
-          if call_full:
+          # ETAPE 2: API-Football - matchs en cours (seulement si dans fenetre)
+          live_index = {}
+          if in_match_window:
               try:
-                  af = fetch(
-                      "https://v3.football.api-sports.io/fixtures?league=1&season=2026&status=FT-AET-PEN",
-                      {"x-apisports-key": API_KEY}
-                  )
-                  for m in af.get("response", []):
+                  af_live = fetch("https://v3.football.api-sports.io/fixtures?live=all", {"x-apisports-key": API_KEY})
+                  for m in af_live.get("response", []):
                       if m["league"]["id"]!=1 or m["league"]["season"]!=2026: continue
                       h = norm(m["teams"]["home"]["name"])
                       a = norm(m["teams"]["away"]["name"])
                       key = norm_key(h, a)
-                      af_index[key] = {"status":"final","sH":m["goals"]["home"] or 0,"sA":m["goals"]["away"] or 0,"elapsed":""}
-                  print(f"API-Football FT: {len(af_index)} matchs termines")
+                      elapsed = m["fixture"]["status"].get("elapsed",0) or 0
+                      live_index[key] = {"status":"in_progress","sH":m["goals"]["home"] or 0,"sA":m["goals"]["away"] or 0,"elapsed":f"{elapsed}'"}
+                  print(f"API-Football LIVE: {len(live_index)} matchs en cours")
               except Exception as e:
-                  print(f"API-Football FT ERREUR: {e}")
+                  print(f"API-Football LIVE ERREUR: {e}")
+          else:
+              print("Hors fenetre: live skipped")
 
-          # ── ETAPE 3: API-Football - matchs en cours (toujours) ──
-          live_index = {}
+          # ETAPE 3: API-Football - matchs termines (FT)
+          af_index = {}
           try:
-              af_live = fetch(
-                  "https://v3.football.api-sports.io/fixtures?live=all",
-                  {"x-apisports-key": API_KEY}
-              )
-              for m in af_live.get("response", []):
+              af_ft = fetch("https://v3.football.api-sports.io/fixtures?league=1&season=2026&status=FT-AET-PEN", {"x-apisports-key": API_KEY})
+              for m in af_ft.get("response", []):
                   if m["league"]["id"]!=1 or m["league"]["season"]!=2026: continue
                   h = norm(m["teams"]["home"]["name"])
                   a = norm(m["teams"]["away"]["name"])
                   key = norm_key(h, a)
-                  elapsed = m["fixture"]["status"].get("elapsed",0) or 0
-                  live_index[key] = {"status":"in_progress","sH":m["goals"]["home"] or 0,"sA":m["goals"]["away"] or 0,"elapsed":f"{elapsed}'"}
-              print(f"API-Football LIVE: {len(live_index)} matchs en cours")
+                  af_index[key] = {"status":"final","sH":m["goals"]["home"] or 0,"sA":m["goals"]["away"] or 0,"elapsed":""}
+              print(f"API-Football FT: {len(af_index)} matchs termines")
           except Exception as e:
-              print(f"API-Football LIVE ERREUR: {e}")
+              print(f"API-Football FT ERREUR: {e}")
 
-          # ── ETAPE 4: API-Football - classements (1x/heure) ──────
-          standings_af = {}
-          if call_full:
-              try:
-                  af_st = fetch(
-                      "https://v3.football.api-sports.io/standings?league=1&season=2026",
-                      {"x-apisports-key": API_KEY}
-                  )
-                  for entry in af_st.get("response", []):
-                      for group_table in entry.get("league", {}).get("standings", []):
-                          for t in group_table:
-                              grp_raw = t.get("group","") or ""
-                              grp = grp_raw.replace("Group ","").strip()[:1] if "Group " in grp_raw else ""
-                              if not grp or not grp.isalpha(): continue
-                              name = t["team"]["name"]
-                              abb = ABB.get(name, name[:3].upper())
-                              fr = FR.get(name, name)
-                              if grp not in standings_af: standings_af[grp] = []
-                              standings_af[grp].append({
-                                  "a":abb,"n":fr,"g":grp,
-                                  "j":t["all"]["played"],"v":t["all"]["win"],
-                                  "nul":t["all"]["draw"],"d":t["all"]["lose"],
-                                  "pts":t["points"],"r":t["rank"]
-                              })
-                  print(f"API-Football standings: {len(standings_af)} groupes")
-              except Exception as e:
-                  print(f"API-Football standings ERREUR: {e}")
-
-          # ── ETAPE 5: Assembler les matchs ────────────────────────
+          # ETAPE 4: Assembler les matchs
           games = []
           sm = {}
 
@@ -155,10 +124,8 @@ jobs:
               hFR = FR.get(h, h)
               aFR = FR.get(a, a)
               start = parse_utc(m.get("date",""), m.get("time",""))
-
               key = norm_key(h, a)
 
-              # Priorite: live > FT > openfootball
               if key in live_index:
                   d = live_index[key]
                   status, sH, sA, el = d["status"], d["sH"], d["sA"], d["elapsed"]
@@ -174,8 +141,7 @@ jobs:
 
               games.append({"id":str(len(games)+1),"status":status,"start":start,"home":ha,"away":aa,"homeN":hFR,"awayN":aFR,"group":grp,"phase":phase,"scoreH":sH,"scoreA":sA,"elapsed":el})
 
-              # Classements fallback depuis openfootball
-              if grp and grp not in standings_af and status=="final":
+              if grp and status=="final":
                   if grp not in sm: sm[grp] = {}
                   for t,ab,fn in [(h,ha,hFR),(a,aa,aFR)]:
                       if ab not in sm[grp]:
@@ -185,23 +151,17 @@ jobs:
                   elif sA>sH: sm[grp][aa]["v"]+=1; sm[grp][aa]["pts"]+=3; sm[grp][ha]["d"]+=1
                   else: sm[grp][ha]["nul"]+=1; sm[grp][ha]["pts"]+=1; sm[grp][aa]["nul"]+=1; sm[grp][aa]["pts"]+=1
 
-          # ── ETAPE 6: Classements finaux ──────────────────────────
           st = []
-          all_grps = sorted(set(list(standings_af.keys()) + list(sm.keys())))
-          for grp in all_grps:
-              if grp in standings_af:
-                  for t in sorted(standings_af[grp], key=lambda x: x["r"]):
-                      st.append(t)
-              else:
-                  for i,t in enumerate(sorted(sm[grp].values(), key=lambda x:-x["pts"])):
-                      t["r"]=i+1; st.append(t)
+          for grp in sorted(sm.keys()):
+              ts = sorted(sm[grp].values(), key=lambda x:-x["pts"])
+              for i,t in enumerate(ts): t["r"]=i+1; st.append(t)
 
           now_s = now_utc.strftime("%Y-%m-%dT%H:%M:%SZ")
           live_count = len([g for g in games if g["status"]=="in_progress"])
           out = {"updated":now_s,"source":"openfootball+api-football","games":games,"standings":st}
           with open("worldcup.json","w",encoding="utf-8") as f:
-              json.dump(out, f, ensure_ascii=False)
-          print(f"OK: {len(games)} matchs, {live_count} en cours, {len(st)} equipes classement")
+              json.dump(out,f,ensure_ascii=False)
+          print(f"OK: {len(games)} matchs, {live_count} en cours, {len(st)} equipes")
           EOF
       - run: |
           git config user.name bot
